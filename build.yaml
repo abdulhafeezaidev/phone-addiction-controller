@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      riverpod_generator:
+        generate_for:
+          exclude:
+            - test/**
+      hive_generator:
+        generate_for:
+          exclude:
+            - test/**
+      riverpod_lint:
+        generate_for:
+          exclude:
+            - test/**

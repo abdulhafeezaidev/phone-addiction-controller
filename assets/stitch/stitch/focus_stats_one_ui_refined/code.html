@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Focus Vault - Stats</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#e4e2e4",
+                        "on-primary-fixed-variant": "#2e3aa2",
+                        "on-secondary-fixed-variant": "#474649",
+                        "on-background": "#e3e2e2",
+                        "outline": "#908f9e",
+                        "on-primary-container": "#fdfaff",
+                        "surface-container-lowest": "#0d0e0f",
+                        "on-tertiary-fixed": "#2b1700",
+                        "on-secondary": "#303032",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "on-primary": "#121f8b",
+                        "tertiary-container": "#a56500",
+                        "surface-dim": "#121414",
+                        "tertiary": "#ffb867",
+                        "outline-variant": "#454652",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-primary-fixed": "#000965",
+                        "primary-container": "#5e6ad2",
+                        "on-surface-variant": "#c6c5d5",
+                        "surface-bright": "#383939",
+                        "inverse-on-surface": "#2f3131",
+                        "surface-container": "#1e2020",
+                        "tertiary-fixed": "#ffddbb",
+                        "surface": "#121414",
+                        "primary": "#bdc2ff",
+                        "on-error": "#690005",
+                        "on-secondary-container": "#b6b4b7",
+                        "on-surface": "#e3e2e2",
+                        "secondary": "#c8c6c8",
+                        "inverse-primary": "#4854bb",
+                        "surface-variant": "#343535",
+                        "primary-fixed": "#dfe0ff",
+                        "secondary-container": "#474649",
+                        "surface-tint": "#bdc2ff",
+                        "secondary-fixed-dim": "#c8c6c8",
+                        "inverse-surface": "#e3e2e2",
+                        "surface-container-low": "#1a1c1c",
+                        "on-secondary-fixed": "#1b1b1d",
+                        "surface-container-highest": "#343535",
+                        "error-container": "#93000a",
+                        "background": "#121414",
+                        "on-tertiary-container": "#fffaf8",
+                        "tertiary-fixed-dim": "#ffb867",
+                        "surface-container-high": "#292a2a",
+                        "primary-fixed-dim": "#bdc2ff",
+                        "on-tertiary": "#482900"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "viewing-area-top": "80px",
+                        "stack-gap": "12px",
+                        "interaction-margin": "24px",
+                        "card-padding": "20px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Hanken Grotesk"],
+                        "headline-xl": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "label-md": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-xl": ["34px", { "lineHeight": "44px", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #121214; /* One UI base layer */
+            color: #e3e2e2;
+        }
+        .one-ui-card {
+            background-color: #212123;
+            border: 1px solid #2C2C2E;
+            border-radius: 28px; /* Squircular approximation */
+        }
+        .chart-bar {
+            background-color: #343535; /* surface-variant */
+            border-radius: 8px 8px 0 0;
+            width: 12px;
+            transition: height 0.5s ease-out;
+        }
+        .chart-bar.active {
+            background-color: #5E6AD2; /* Primary indigo */
+        }
+        
+        /* Webkit scrollbar for horizontal lists */
+        ::-webkit-scrollbar {
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2C2C2E;
+            border-radius: 4px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-lg min-h-screen pb-24 selection:bg-primary-container selection:text-on-primary-container">
+<!-- Viewing Area (Top 1/3 approximation) -->
+<header class="pt-viewing-area-top px-interaction-margin pb-6 flex flex-col justify-end min-h-[265px]">
+<h1 class="font-display-lg text-display-lg text-on-background mb-2 tracking-tight">Focus Stats</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Your productivity breakdown.</p>
+</header>
+<!-- Interaction Area (Bottom 2/3 approximation) -->
+<main class="px-interaction-margin space-y-stack-gap pb-8">
+<!-- Weekly Summary Card -->
+<section class="one-ui-card p-card-padding">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="font-title-md text-title-md text-on-surface">Weekly Summary</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Oct 16 - Oct 22</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+</div>
+<div class="mb-6">
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-headline-xl text-primary">32h 15m</span>
+</div>
+<div class="flex items-center gap-2 mt-2 text-tertiary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+<span class="font-body-md text-body-md">You focused 4h more than last week.</span>
+</div>
+</div>
+<!-- Minimalist Bar Chart (Weekly) -->
+<div class="h-32 flex items-end justify-between px-2 pt-4 border-t border-outline-variant/30">
+<div class="flex flex-col items-center gap-2 h-full justify-end">
+<div class="chart-bar h-[40%]"></div>
+<span class="font-label-md text-label-md text-on-surface-variant">M</span>
+</div>
+<div class="flex flex-col items-center gap-2 h-full justify-end">
+<div class="chart-bar h-[65%]"></div>
+<span class="font-label-md text-label-md text-on-surface-variant">T</span>
+</div>
+<div class="flex flex-col items-center gap-2 h-full justify-end">
+<div class="chart-bar h-[80%]"></div>
+<span class="font-label-md text-label-md text-on-surface-variant">W</span>
+</div>
+<div class="flex flex-col items-center gap-2 h-full justify-end">
+<div class="chart-bar active h-[100%] shadow-[0_0_15px_rgba(94,106,210,0.3)]"></div>
+<span class="font-label-md text-label-md text-primary">T</span>
+</div>
+<div class="flex flex-col items-center gap-2 h-full justify-end">
+<div class="chart-bar h-[50%]"></div>
+<span class="font-label-md text-label-md text-on-surface-variant">F</span>
+</div>
+<div class="flex flex-col items-center gap-2 h-full justify-end">
+<div class="chart-bar h-[20%]"></div>
+<span class="font-label-md text-label-md text-on-surface-variant">S</span>
+</div>
+<div class="flex flex-col items-center gap-2 h-full justify-end">
+<div class="chart-bar h-[10%]"></div>
+<span class="font-label-md text-label-md text-on-surface-variant">S</span>
+</div>
+</div>
+</section>
+<!-- Bento Grid Layout for Secondary Stats -->
+<div class="grid grid-cols-2 gap-stack-gap">
+<!-- Longest Session -->
+<div class="one-ui-card p-card-padding flex flex-col justify-between aspect-square active:bg-surface-bright transition-colors">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[18px]">timer</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">Longest Session</p>
+<p class="font-title-md text-title-md text-on-surface">2h 45m</p>
+</div>
+</div>
+<!-- Focus Score -->
+<div class="one-ui-card p-card-padding flex flex-col justify-between aspect-square active:bg-surface-bright transition-colors relative overflow-hidden">
+<!-- Decorative gradient -->
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-xl"></div>
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface z-10">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</div>
+<div class="z-10">
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">Focus Score</p>
+<div class="flex items-end gap-1">
+<p class="font-title-md text-title-md text-primary">92</p>
+<p class="font-label-md text-label-md text-on-surface-variant pb-[2px]">/100</p>
+</div>
+</div>
+</div>
+</div>
+<!-- App Usage List -->
+<section class="one-ui-card p-card-padding">
+<h3 class="font-title-md text-title-md text-on-surface mb-4">Top Focus Apps</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-[#2C2C2E] flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface">code</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-medium">VS Code</p>
+<p class="font-label-md text-label-md text-on-surface-variant">Development</p>
+</div>
+</div>
+<span class="font-body-md text-body-md text-on-surface">14h 20m</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-[#2C2C2E] flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface">design_services</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-medium">Figma</p>
+<p class="font-label-md text-label-md text-on-surface-variant">Design</p>
+</div>
+</div>
+<span class="font-body-md text-body-md text-on-surface">8h 45m</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-[#2C2C2E] flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface">book</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-medium">Notion</p>
+<p class="font-label-md text-label-md text-on-surface-variant">Planning</p>
+</div>
+</div>
+<span class="font-body-md text-body-md text-on-surface">4h 10m</span>
+</div>
+</div>
+<button class="w-full mt-6 py-3 rounded-xl bg-surface-variant text-on-surface font-body-md text-body-md active:bg-[#383939] transition-colors">
+                View All Apps
+            </button>
+</section>
+</main>
+<!-- BottomNavBar JSON Component -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 bg-surface-container dark:bg-surface-container border-t border-outline-variant dark:border-outline-variant flat no shadows h-16 z-50 md:hidden">
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full">
+<span class="material-symbols-outlined">apps</span>
+<span class="font-label-md text-label-md mt-1">Apps</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full">
+<span class="material-symbols-outlined">timer</span>
+<span class="font-label-md text-label-md mt-1">Focus</span>
+</button>
+<!-- ACTIVE TAB -->
+<button class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container dark:text-on-primary-container rounded-full px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+<span class="font-label-md text-label-md mt-1">Stats</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md mt-1">Settings</span>
+</button>
+</nav>
+<!-- TopAppBar JSON Component (Hidden on mobile, flex on md) -->
+<header class="bg-background dark:bg-background pt-viewing-area-top pb-gutter w-full px-interaction-margin flex flex-col hidden md:flex fixed top-0 z-50">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary dark:text-primary text-3xl">shield_lock</span>
+<span class="font-headline-xl text-headline-xl font-bold text-primary dark:text-primary">Focus Vault</span>
+</div>
+<div class="flex gap-6 items-center">
+<a class="text-on-surface-variant dark:text-on-surface-variant font-body-lg hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-200 px-3 py-2 rounded-lg" href="#">Home</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-body-lg hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-200 px-3 py-2 rounded-lg" href="#">Apps</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-body-lg hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-200 px-3 py-2 rounded-lg" href="#">Focus</a>
+<!-- ACTIVE NAV ITEM (Web) -->
+<a class="text-primary dark:text-primary font-body-lg font-medium px-3 py-2" href="#">Stats</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant font-body-lg hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-200 px-3 py-2 rounded-lg" href="#">Settings</a>
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center ml-4 border border-outline-variant">
+<img class="w-full h-full object-cover rounded-full" data-alt="A small circular avatar placeholder image with a dark grey background and a minimalist white user silhouette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzRV_CsEKIa2c0cU_3G8JHjK1BHDZEEGQzqHtMz6vMiWYTZ9iw3oWT79rJk9kXr6-BQe8jgbq3yX67-wiiwbVKmqKwM0MSjK6VfyN3aaNQkPIWnItHZYzKmoD63FVOdq9c5LGCEFSQFJti6sR-7mdCqpzjDpg9DlyhKmCxF27gVR23pQhMqXsdKYas32Sk1rW0Z3MI4cJhJzhG-eG5MnmVBfgfpPFQDoo-Cklx7hVztQEnTiTDhKKFHsEuEx-Z0JWy_vn6mfqYoZU"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Spacer for desktop nav -->
+<div class="hidden md:block h-32 w-full"></div>
+</body></html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Administrator Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#343535",
+                        "secondary": "#c8c6c8",
+                        "tertiary-container": "#a56500",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb867",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-primary-fixed": "#000965",
+                        "inverse-on-surface": "#2f3131",
+                        "inverse-primary": "#4854bb",
+                        "on-surface-variant": "#c6c5d5",
+                        "surface-variant": "#343535",
+                        "inverse-surface": "#e3e2e2",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#fdfaff",
+                        "secondary-fixed-dim": "#c8c6c8",
+                        "primary-fixed-dim": "#bdc2ff",
+                        "on-tertiary-fixed": "#2b1700",
+                        "surface-container-lowest": "#0d0e0f",
+                        "outline": "#908f9e",
+                        "surface-tint": "#bdc2ff",
+                        "surface-bright": "#383939",
+                        "surface": "#121414",
+                        "tertiary": "#ffb867",
+                        "surface-container": "#1e2020",
+                        "on-secondary-fixed-variant": "#474649",
+                        "on-background": "#e3e2e2",
+                        "on-secondary-container": "#b6b4b7",
+                        "primary": "#bdc2ff",
+                        "on-secondary-fixed": "#1b1b1d",
+                        "on-surface": "#e3e2e2",
+                        "surface-dim": "#121414",
+                        "on-secondary": "#303032",
+                        "on-primary-fixed-variant": "#2e3aa2",
+                        "surface-container-high": "#292a2a",
+                        "on-primary": "#121f8b",
+                        "primary-fixed": "#dfe0ff",
+                        "background": "#121414",
+                        "surface-container-low": "#1a1c1c",
+                        "on-tertiary-container": "#fffaf8",
+                        "on-error": "#690005",
+                        "secondary-container": "#474649",
+                        "primary-container": "#5e6ad2",
+                        "on-tertiary": "#482900",
+                        "tertiary-fixed": "#ffddbb",
+                        "secondary-fixed": "#e4e2e4",
+                        "outline-variant": "#454652",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "stack-gap": "12px",
+                        "interaction-margin": "24px",
+                        "card-padding": "20px",
+                        "viewing-area-top": "80px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Hanken Grotesk"],
+                        "label-md": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "title-md": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["34px", { "lineHeight": "44px", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "display-lg": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Hanken Grotesk', sans-serif; }
+        .squircle { border-radius: 20px; }
+        .btn-squircle { border-radius: 16px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col antialiased">
+<!-- TopAppBar -->
+<header class="w-full pt-viewing-area-top pb-gutter bg-background dark:bg-background flex flex-col px-interaction-margin w-full sticky top-0 z-10">
+<div class="flex items-center gap-4 mb-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-primary dark:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+</div>
+<h1 class="font-headline-xl text-headline-xl font-bold text-primary dark:text-primary">Administrator</h1>
+</header>
+<!-- Main Content Area - Reachability Focused -->
+<main class="flex-1 px-interaction-margin pb-24 flex flex-col gap-stack-gap">
+<!-- Status Card -->
+<section class="bg-surface-container squircle p-card-padding border border-outline-variant/30 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-title-md text-title-md text-on-surface">Password Status</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Currently protected</p>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+</div>
+</div>
+<div class="flex flex-col gap-3 mt-2">
+<button class="w-full h-14 bg-primary-container text-on-primary-container btn-squircle font-title-md text-title-md flex items-center justify-center transition-transform active:scale-[0.98]">
+                    Change Password
+                </button>
+<button class="w-full h-14 bg-surface-container-high text-on-surface border border-outline-variant/50 btn-squircle font-title-md text-title-md flex items-center justify-center transition-transform active:scale-[0.98]">
+                    Remove Password
+                </button>
+</div>
+</section>
+<!-- Protected Actions List -->
+<section class="mt-6 flex flex-col gap-stack-gap">
+<h3 class="font-title-md text-title-md text-on-surface-variant px-2">Protected Actions</h3>
+<div class="bg-surface-container squircle border border-outline-variant/30 overflow-hidden divide-y divide-outline-variant/20">
+<!-- Action Item 1 -->
+<div class="p-card-padding flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">device_reset</span>
+<div>
+<p class="font-body-lg text-body-lg text-on-surface">Factory Reset</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Requires admin password</p>
+</div>
+</div>
+<div class="w-12 h-6 bg-primary-container rounded-full flex items-center p-1 justify-end">
+<div class="w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+<!-- Action Item 2 -->
+<div class="p-card-padding flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">system_update</span>
+<div>
+<p class="font-body-lg text-body-lg text-on-surface">System Updates</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Auto-install firmware</p>
+</div>
+</div>
+<div class="w-12 h-6 bg-surface-container-highest rounded-full flex items-center p-1 justify-start">
+<div class="w-4 h-4 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<!-- Action Item 3 -->
+<div class="p-card-padding flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">vpn_key</span>
+<div>
+<p class="font-body-lg text-body-lg text-on-surface">Manage Certificates</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Install/remove credentials</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 bg-surface-container dark:bg-surface-container z-50 h-16 shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined">apps</span>
+<span class="font-label-md text-label-md mt-1">Apps</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined">timer</span>
+<span class="font-label-md text-label-md mt-1">Focus</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-label-md text-label-md mt-1">Stats</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container dark:text-on-primary-container rounded-full px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-md text-label-md mt-1">Settings</span>
+</a>
+</nav>
+</body></html>

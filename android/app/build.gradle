@@ -1,0 +1,67 @@
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.personal.phone_addiction_controller"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        // Required for Hive on older APIs
+        coreLibraryDesugaringEnabled = true
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    defaultConfig {
+        applicationId = "com.personal.phone_addiction_controller"
+        // Focus Guard requires Android 6.0+ for AccessibilityService APIs
+        minSdkVersion = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+
+        // Required for permission_handler
+        multiDexEnabled = true
+    }
+
+    buildTypes {
+        release {
+            // For personal use — signing config can be set later
+            signingConfig = signingConfigs.debug
+            // Disable minification for easier debugging
+            minifyEnabled = false
+            shrinkResources = false
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    // Core library desugaring for Java 8+ APIs on API < 26
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+
+    // Kotlin standard library
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.20")
+
+    // AndroidX Core
+    implementation("androidx.core:core-ktx:1.13.1")
+
+    // AndroidX Lifecycle for ForegroundService
+    implementation("androidx.lifecycle:lifecycle-service:2.8.3")
+}

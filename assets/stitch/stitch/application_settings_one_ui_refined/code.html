@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings - Focus Vault</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Hanken Grotesk', sans-serif;
+        }
+        /* One UI specific tweaks */
+        .settings-list-item {
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.2s ease;
+        }
+        .settings-list-item:active {
+            background-color: #2C2C2E !important; /* Touch feedback */
+        }
+        
+        /* Custom Toggle Switch for One UI feel */
+        .toggle-switch {
+            appearance: none;
+            width: 52px;
+            height: 28px;
+            background-color: #454652; /* outline-variant */
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s ease;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .toggle-switch:checked {
+            background-color: #5e6ad2; /* primary-container */
+        }
+        .toggle-switch:checked::after {
+            transform: translateX(24px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-highest": "#343535",
+                      "secondary": "#c8c6c8",
+                      "tertiary-container": "#a56500",
+                      "on-error-container": "#ffdad6",
+                      "tertiary-fixed-dim": "#ffb867",
+                      "on-tertiary-fixed-variant": "#673d00",
+                      "on-primary-fixed": "#000965",
+                      "inverse-on-surface": "#2f3131",
+                      "inverse-primary": "#4854bb",
+                      "on-surface-variant": "#c6c5d5",
+                      "surface-variant": "#343535",
+                      "inverse-surface": "#e3e2e2",
+                      "error-container": "#93000a",
+                      "on-primary-container": "#fdfaff",
+                      "secondary-fixed-dim": "#c8c6c8",
+                      "primary-fixed-dim": "#bdc2ff",
+                      "on-tertiary-fixed": "#2b1700",
+                      "surface-container-lowest": "#0d0e0f",
+                      "outline": "#908f9e",
+                      "surface-tint": "#bdc2ff",
+                      "surface-bright": "#383939",
+                      "surface": "#121414",
+                      "tertiary": "#ffb867",
+                      "surface-container": "#1e2020",
+                      "on-secondary-fixed-variant": "#474649",
+                      "on-background": "#e3e2e2",
+                      "on-secondary-container": "#b6b4b7",
+                      "primary": "#bdc2ff",
+                      "on-secondary-fixed": "#1b1b1d",
+                      "on-surface": "#e3e2e2",
+                      "surface-dim": "#121414",
+                      "on-secondary": "#303032",
+                      "on-primary-fixed-variant": "#2e3aa2",
+                      "surface-container-high": "#292a2a",
+                      "on-primary": "#121f8b",
+                      "primary-fixed": "#dfe0ff",
+                      "background": "#121414",
+                      "surface-container-low": "#1a1c1c",
+                      "on-tertiary-container": "#fffaf8",
+                      "on-error": "#690005",
+                      "secondary-container": "#474649",
+                      "primary-container": "#5e6ad2",
+                      "on-tertiary": "#482900",
+                      "tertiary-fixed": "#ffddbb",
+                      "secondary-fixed": "#e4e2e4",
+                      "outline-variant": "#454652",
+                      "error": "#ffb4ab"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px",
+                      "squircle": "20px" /* Card padding equivalent usually */
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "stack-gap": "12px",
+                      "interaction-margin": "24px",
+                      "card-padding": "20px",
+                      "viewing-area-top": "80px"
+              },
+              "fontFamily": {
+                      "headline-xl": [
+                              "Hanken Grotesk"
+                      ],
+                      "label-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg-mobile": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "title-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "display-lg": [
+                              "Hanken Grotesk"
+                      ]
+              },
+              "fontSize": {
+                      "headline-xl": [
+                              "34px",
+                              {
+                                      "lineHeight": "44px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "title-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "56px",
+                              {
+                                      "lineHeight": "64px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="w-full pt-viewing-area-top pb-gutter bg-background dark:bg-background flat no shadows flex flex-col px-interaction-margin w-full sticky top-0 z-40">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors text-primary">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container">
+<img class="w-full h-full object-cover" data-alt="A close up portrait of a young professional in a softly lit, modern office environment. Dark mode aesthetic with deep shadows and a slight indigo tint. The person has a neutral, calm expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAY1lXn5Xg2LTYrhoA2VDu8cUP5DJS7KXH5STV9sI9UAiRecvGnHAopU_-7QaeKi1Q84YdYHhhD9o5LnlLtrn-5Pm4bSiBqs3-ZczNqI2poPYr4TAvN1AWVWQoidQyhVjeXqjlvuke_3psg9EdXgm_Mjigde4GQ1IxQQQ2xskAhJKCHP9afCXfWuTsD-zhMg0X7kCK7B22Cv52wD6IaRyuG3Vg6uXoJz32qvLKE9IulqtVTLyY38I1u2YTFePYyjnJIewxJu-GkwT8"/>
+</div>
+</div>
+<h1 class="font-headline-xl text-headline-xl font-bold text-primary dark:text-primary">Settings</h1>
+</header>
+<!-- Main Content - Interaction Area -->
+<main class="px-interaction-margin pt-4 space-y-stack-gap md:max-w-3xl md:mx-auto">
+<!-- General Card -->
+<section class="bg-[#212123] rounded-squircle p-0 border border-[#2C2C2E] overflow-hidden">
+<h2 class="font-title-md text-title-md text-on-surface-variant px-card-padding pt-card-padding pb-2">General</h2>
+<div class="settings-list-item flex items-center justify-between px-card-padding py-4 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">person</span>
+</div>
+<div>
+<div class="font-body-lg text-body-lg text-on-surface">Account</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Manage profile and security</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<div class="h-[1px] bg-surface-container-high mx-card-padding"></div>
+<div class="settings-list-item flex items-center justify-between px-card-padding py-4 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">palette</span>
+</div>
+<div>
+<div class="font-body-lg text-body-lg text-on-surface">Appearance</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Theme and styling</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<div class="h-[1px] bg-surface-container-high mx-card-padding"></div>
+<label class="settings-list-item flex items-center justify-between px-card-padding py-4 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dark_mode</span>
+</div>
+<div>
+<div class="font-body-lg text-body-lg text-on-surface">Dark Mode</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Switch to dark theme</div>
+</div>
+</div>
+<input checked="" class="toggle-switch" type="checkbox"/>
+</label>
+</section>
+<!-- Focus Behaviour Card -->
+<section class="bg-[#212123] rounded-squircle p-0 border border-[#2C2C2E] overflow-hidden mt-stack-gap">
+<h2 class="font-title-md text-title-md text-on-surface-variant px-card-padding pt-card-padding pb-2">Focus Behaviour</h2>
+<label class="settings-list-item flex items-center justify-between px-card-padding py-4 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">do_not_disturb_on</span>
+</div>
+<div>
+<div class="font-body-lg text-body-lg text-on-surface">Strict Mode</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Block apps during sessions</div>
+</div>
+</div>
+<input checked="" class="toggle-switch" type="checkbox"/>
+</label>
+<div class="h-[1px] bg-surface-container-high mx-card-padding"></div>
+<label class="settings-list-item flex items-center justify-between px-card-padding py-4 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">volume_off</span>
+</div>
+<div>
+<div class="font-body-lg text-body-lg text-on-surface">Mute Notifications</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Silence calls and alerts</div>
+</div>
+</div>
+<input class="toggle-switch" type="checkbox"/>
+</label>
+<div class="h-[1px] bg-surface-container-high mx-card-padding"></div>
+<div class="settings-list-item flex items-center justify-between px-card-padding py-4 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">schedule</span>
+</div>
+<div>
+<div class="font-body-lg text-body-lg text-on-surface">Default Session Length</div>
+<div class="font-body-md text-body-md text-primary">25 Minutes</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+</div>
+</section>
+<!-- Danger Zone Card -->
+<section class="bg-[#212123] rounded-squircle p-0 border border-error-container mt-stack-gap mb-8">
+<h2 class="font-title-md text-title-md text-error px-card-padding pt-card-padding pb-2">Danger Zone</h2>
+<div class="settings-list-item flex items-center justify-between px-card-padding py-4 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-error-container/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">delete_forever</span>
+</div>
+<div>
+<div class="font-body-lg text-body-lg text-error">Delete Account</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Permanently remove your data</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-error">chevron_right</span>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 h-16 border-t border-outline-variant dark:border-outline-variant flat no shadows fixed bottom-0 left-0 w-full flex justify-around items-center px-4 bg-surface-container dark:bg-surface-container">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">apps</span>
+<span class="font-label-md text-label-md mt-1">Apps</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">timer</span>
+<span class="font-label-md text-label-md mt-1">Focus</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">bar_chart</span>
+<span class="font-label-md text-label-md mt-1">Stats</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container dark:text-on-primary-container rounded-full px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-md text-label-md mt-1">Settings</span>
+</a>
+</nav>
+</body></html>

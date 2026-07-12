@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "C:\\Users\\abdul\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\scripts\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "E:\\Phone Addiction Controller\\.android-sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "E:\\Phone Addiction Controller\\android\\app\\.cxx\\release\\3f4z6jqw\\x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "E:\\Phone Addiction Controller\\.android-sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "E:\\Phone Addiction Controller\\android\\app\\.cxx\\release\\3f4z6jqw\\x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {},
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "E:\\Phone Addiction Controller\\.android-sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang.exe",
+      "cppCompilerExecutable": "E:\\Phone Addiction Controller\\.android-sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": []
+}

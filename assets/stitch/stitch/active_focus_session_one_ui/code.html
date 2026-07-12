@@ -1,0 +1,223 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Active Focus Session - Focus Vault</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .circular-chart {
+            display: block;
+            margin: 10px auto;
+            max-width: 80%;
+            max-height: 250px;
+        }
+        .circle-bg {
+            fill: none;
+            stroke: #212123;
+            stroke-width: 2;
+        }
+        .circle {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            animation: progress 1s ease-out forwards;
+        }
+        @keyframes progress {
+            0% {
+                stroke-dasharray: 0 100;
+            }
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#343535",
+                    "secondary": "#c8c6c8",
+                    "tertiary-container": "#a56500",
+                    "on-error-container": "#ffdad6",
+                    "tertiary-fixed-dim": "#ffb867",
+                    "on-tertiary-fixed-variant": "#673d00",
+                    "on-primary-fixed": "#000965",
+                    "inverse-on-surface": "#2f3131",
+                    "inverse-primary": "#4854bb",
+                    "on-surface-variant": "#c6c5d5",
+                    "surface-variant": "#343535",
+                    "inverse-surface": "#e3e2e2",
+                    "error-container": "#93000a",
+                    "on-primary-container": "#fdfaff",
+                    "secondary-fixed-dim": "#c8c6c8",
+                    "primary-fixed-dim": "#bdc2ff",
+                    "on-tertiary-fixed": "#2b1700",
+                    "surface-container-lowest": "#0d0e0f",
+                    "outline": "#908f9e",
+                    "surface-tint": "#bdc2ff",
+                    "surface-bright": "#383939",
+                    "surface": "#121414",
+                    "tertiary": "#ffb867",
+                    "surface-container": "#1e2020",
+                    "on-secondary-fixed-variant": "#474649",
+                    "on-background": "#e3e2e2",
+                    "on-secondary-container": "#b6b4b7",
+                    "primary": "#bdc2ff",
+                    "on-secondary-fixed": "#1b1b1d",
+                    "on-surface": "#e3e2e2",
+                    "surface-dim": "#121414",
+                    "on-secondary": "#303032",
+                    "on-primary-fixed-variant": "#2e3aa2",
+                    "surface-container-high": "#292a2a",
+                    "on-primary": "#121f8b",
+                    "primary-fixed": "#dfe0ff",
+                    "background": "#121414",
+                    "surface-container-low": "#1a1c1c",
+                    "on-tertiary-container": "#fffaf8",
+                    "on-error": "#690005",
+                    "secondary-container": "#474649",
+                    "primary-container": "#5e6ad2",
+                    "on-tertiary": "#482900",
+                    "tertiary-fixed": "#ffddbb",
+                    "secondary-fixed": "#e4e2e4",
+                    "outline-variant": "#454652",
+                    "error": "#ffb4ab"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px",
+                    "squircle": "24px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "stack-gap": "12px",
+                    "interaction-margin": "24px",
+                    "card-padding": "20px",
+                    "viewing-area-top": "80px"
+            },
+            "fontFamily": {
+                    "headline-xl": ["Hanken Grotesk"],
+                    "label-md": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "title-md": ["Hanken Grotesk"],
+                    "display-lg": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "headline-xl": ["34px", {"lineHeight": "44px", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "title-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "display-lg": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-background dark:bg-background text-on-background min-h-screen flex flex-col font-sans antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="w-full pt-viewing-area-top pb-gutter bg-background dark:bg-background flat no shadows flex flex-col px-interaction-margin w-full transition-colors duration-200">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary dark:text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+<h1 class="font-headline-xl text-headline-xl font-bold text-primary dark:text-primary">Focus Vault</h1>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center overflow-hidden border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex flex-col px-interaction-margin pb-24 md:pb-interaction-margin gap-stack-gap md:grid md:grid-cols-12 md:max-w-6xl md:mx-auto md:w-full">
+<!-- Viewing Area (Mobile 1/3) -->
+<div class="md:col-span-12 flex flex-col justify-end pb-8 min-h-[150px] md:min-h-0">
+<h2 class="font-display-lg text-display-lg text-on-background">Active Focus</h2>
+</div>
+<!-- Interaction Area (Mobile 2/3) -->
+<div class="md:col-span-12 flex flex-col gap-stack-gap">
+<!-- Timer Card -->
+<div class="bg-surface-container rounded-squircle p-card-padding border border-[#2C2C2E] flex flex-col items-center justify-center relative overflow-hidden shadow-[0_8px_32px_rgba(94,106,210,0.05)]">
+<!-- Circular Progress -->
+<div class="relative w-64 h-64 flex items-center justify-center">
+<svg class="circular-chart text-primary w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831" style="stroke: rgb(69, 70, 82); stroke-width: 2.5;"></path>
+<path class="circle stroke-current" d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="65, 100"></path>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="font-display-lg text-display-lg text-on-background tracking-tight">20:53</span>
+<span class="font-label-md text-label-md uppercase tracking-widest mt-1 text-on-background">Remaining</span>
+</div>
+</div>
+</div>
+<!-- Status Details Card -->
+<div class="bg-[#212123] rounded-squircle p-card-padding border border-[#2C2C2E] flex flex-col gap-4">
+<div class="flex items-center gap-4 bg-surface-container-lowest p-4 rounded-xl">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">chat</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant">Focusing on</span>
+<span class="font-title-md text-title-md text-on-background">Slack</span>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-lowest p-4 rounded-xl">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">schedule</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant">Ends at</span>
+<span class="font-title-md text-title-md text-on-background">10:06 AM</span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-3 mt-4">
+<button class="w-full h-14 bg-[#2C2C2E] hover:bg-surface-container-highest transition-colors rounded-squircle flex items-center justify-center gap-2 active:bg-[#3C3C3E]">
+<span class="font-title-md text-title-md text-on-background">End Session</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">lock</span>
+</button>
+<button class="w-full h-14 bg-error-container/20 border border-error-container/50 hover:bg-error-container/30 transition-colors rounded-squircle flex items-center justify-center gap-2 active:bg-error-container/40">
+<span class="font-title-md text-title-md text-error">Emergency Exit</span>
+<span class="material-symbols-outlined text-error text-sm">admin_panel_settings</span>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Suppressed due to Task-Focused Intent, but structure kept for system consistency if needed) -->
+<!-- Navigation intentionally suppressed as this is a focused "Active Session" journey -->
+<script>
+        // Simple timer animation script
+        let seconds = 1499; // 24:59
+        const timeDisplay = document.querySelector('.absolute .font-display-lg');
+        
+        setInterval(() => {
+            if(seconds > 0) {
+                seconds--;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                timeDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+        }, 1000);
+    </script>
+
+
+</body></html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Permissions Status</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#343535",
+                        "secondary": "#c8c6c8",
+                        "tertiary-container": "#a56500",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb867",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "on-primary-fixed": "#000965",
+                        "inverse-on-surface": "#2f3131",
+                        "inverse-primary": "#4854bb",
+                        "on-surface-variant": "#c6c5d5",
+                        "surface-variant": "#343535",
+                        "inverse-surface": "#e3e2e2",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#fdfaff",
+                        "secondary-fixed-dim": "#c8c6c8",
+                        "primary-fixed-dim": "#bdc2ff",
+                        "on-tertiary-fixed": "#2b1700",
+                        "surface-container-lowest": "#0d0e0f",
+                        "outline": "#908f9e",
+                        "surface-tint": "#bdc2ff",
+                        "surface-bright": "#383939",
+                        "surface": "#121414",
+                        "tertiary": "#ffb867",
+                        "surface-container": "#1e2020",
+                        "on-secondary-fixed-variant": "#474649",
+                        "on-background": "#e3e2e2",
+                        "on-secondary-container": "#b6b4b7",
+                        "primary": "#bdc2ff",
+                        "on-secondary-fixed": "#1b1b1d",
+                        "on-surface": "#e3e2e2",
+                        "surface-dim": "#121414",
+                        "on-secondary": "#303032",
+                        "on-primary-fixed-variant": "#2e3aa2",
+                        "surface-container-high": "#292a2a",
+                        "on-primary": "#121f8b",
+                        "primary-fixed": "#dfe0ff",
+                        "background": "#121414",
+                        "surface-container-low": "#1a1c1c",
+                        "on-tertiary-container": "#fffaf8",
+                        "on-error": "#690005",
+                        "secondary-container": "#474649",
+                        "primary-container": "#5e6ad2",
+                        "on-tertiary": "#482900",
+                        "tertiary-fixed": "#ffddbb",
+                        "secondary-fixed": "#e4e2e4",
+                        "outline-variant": "#454652",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.25rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "stack-gap": "12px",
+                        "interaction-margin": "24px",
+                        "card-padding": "20px",
+                        "viewing-area-top": "80px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Hanken Grotesk"],
+                        "label-md": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "title-md": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["34px", { "lineHeight": "44px", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "display-lg": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        .card-container { background-color: theme('colors.surface-container'); border: 1px solid theme('colors.surface-container-highest'); }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col md:hidden">
+<!-- TopAppBar -->
+<header class="w-full pt-viewing-area-top pb-gutter bg-background dark:bg-background flex flex-col px-interaction-margin">
+<div class="flex items-center justify-between mb-4">
+<button class="text-primary dark:text-primary transition-colors duration-200 hover:bg-surface-container-high dark:hover:bg-surface-container-high p-2 rounded-full -ml-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">shield_lock</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+</div>
+<h1 class="font-headline-xl text-headline-xl font-bold text-primary dark:text-primary mb-2">Focus Vault</h1>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile dark:text-on-background">System Permissions</h2>
+</header>
+<!-- Main Content Area (Interaction Area) -->
+<main class="flex-1 px-interaction-margin pb-32 flex flex-col gap-stack-gap"><div class="grid grid-cols-3 gap-4 mb-2">
+    <div class="card-container rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+        <span class="material-symbols-outlined text-primary mb-1">timer</span>
+        <span class="text-[10px] font-label-md text-on-surface-variant uppercase tracking-wider">Focus</span>
+        <span class="text-title-md font-bold text-on-surface">4.2h</span>
+    </div>
+    <div class="card-container rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+        <span class="material-symbols-outlined text-primary mb-1">task_alt</span>
+        <span class="text-[10px] font-label-md text-on-surface-variant uppercase tracking-wider">Sessions</span>
+        <span class="text-title-md font-bold text-on-surface">12</span>
+    </div>
+    <div class="card-container rounded-2xl p-4 flex flex-col items-center justify-center text-center border-primary/30">
+        <span class="material-symbols-outlined text-tertiary mb-1" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+        <span class="text-[10px] font-label-md text-on-surface-variant uppercase tracking-wider">Saved</span>
+        <span class="text-title-md font-bold text-tertiary">55m</span>
+    </div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-2">
+            These permissions are critical for core functionality. Please ensure all are granted.
+        </p>
+<!-- Permissions List -->
+<!-- Accessibility Card -->
+<div class="card-container rounded-3xl p-card-padding flex flex-col gap-4">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-container bg-opacity-20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">accessibility_new</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Accessibility</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1 mt-1">Required to block distracting apps.</p>
+</div>
+</div>
+</div>
+<button class="w-full h-14 bg-primary-container text-on-primary-container font-label-md text-label-md rounded-2xl flex items-center justify-center transition-transform active:scale-95">
+                Open Settings
+            </button>
+</div>
+<!-- Usage Access Card -->
+<div class="card-container rounded-3xl p-card-padding flex flex-col gap-4">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-container bg-opacity-20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">data_usage</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Usage Access</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1 mt-1">Tracks time spent in apps.</p>
+</div>
+</div>
+</div>
+<button class="w-full h-14 bg-surface-container-high text-on-surface font-label-md text-label-md rounded-2xl flex items-center justify-center transition-transform active:scale-95 border border-surface-container-highest">
+                Open Settings
+            </button>
+</div>
+<!-- Overlay Card (Granted) -->
+<div class="card-container rounded-3xl p-card-padding flex flex-col gap-4">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">layers</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface opacity-75">Display Over Other Apps</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1 mt-1 opacity-75">Shows focus screens.</p>
+</div>
+</div>
+<div class="bg-surface-container-highest text-secondary px-3 py-1 rounded-full font-label-md text-label-md text-xs mt-1">
+                    Granted
+                </div>
+</div>
+</div>
+<!-- Battery Card -->
+<div class="card-container rounded-3xl p-card-padding flex flex-col gap-4">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-container bg-opacity-20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">battery_saver</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Battery Optimization</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1 mt-1">Prevents background termination.</p>
+</div>
+</div>
+</div>
+<button class="w-full h-14 bg-surface-container-high text-on-surface font-label-md text-label-md rounded-2xl flex items-center justify-center transition-transform active:scale-95 border border-surface-container-highest">
+                Disable Optimization
+            </button>
+</div>
+<!-- Diagnostic Section -->
+<h3 class="font-title-md text-title-md text-on-surface mt-4 mb-2">Service Diagnostics</h3>
+<div class="card-container rounded-3xl p-card-padding grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">monitor_heart</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Heartbeat</span>
+<span class="font-body-lg text-body-lg text-on-surface">Active (12ms)</span>
+</div>
+<div class="flex flex-col gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">memory</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Service</span>
+<span class="font-body-lg text-body-lg text-on-surface">Running</span>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 bg-surface-container dark:bg-surface-container border-t border-outline-variant dark:border-outline-variant z-50 h-16 transition-transform duration-150">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant rounded-full" href="#">
+<span class="material-symbols-outlined text-xl mb-1">home</span>
+<span class="font-label-md text-label-md text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant rounded-full" href="#">
+<span class="material-symbols-outlined text-xl mb-1">apps</span>
+<span class="font-label-md text-label-md text-[10px]">Apps</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant rounded-full" href="#">
+<span class="material-symbols-outlined text-xl mb-1">timer</span>
+<span class="font-label-md text-label-md text-[10px]">Focus</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-variant dark:hover:bg-surface-variant rounded-full" href="#">
+<span class="material-symbols-outlined text-xl mb-1">bar_chart</span>
+<span class="font-label-md text-label-md text-[10px]">Stats</span>
+</a>
+<!-- Active Tab -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container dark:text-on-primary-container rounded-full px-5 py-1 scale-105 shadow-sm" href="#">
+<span class="material-symbols-outlined text-xl mb-1" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-md text-label-md text-[10px] font-bold">Settings</span>
+</a>
+</nav>
+
+
+</body></html>
