@@ -70,11 +70,10 @@ class SessionTrackingServiceImpl implements SessionTrackingService {
   @override
   Future<FocusSession?> getActiveSession() async {
     final sessions = await getAllSessions();
-    try {
-      return sessions.firstWhere((s) => s.isActive);
-    } catch (_) {
-      return null;
+    for (final s in sessions) {
+      if (s.isActive) return s;
     }
+    return null;
   }
 
   @override

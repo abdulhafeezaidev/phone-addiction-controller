@@ -28,7 +28,15 @@ class EmergencyOverrideServiceImpl implements EmergencyOverrideService {
         _passwordService = passwordService,
         _scheduleService = scheduleService,
         _focusSessionManager = focusSessionManager {
-    _startPeriodicCheck();
+    // Check on init if periodic monitoring is needed
+    _checkAndStartTimerIfNeeded();
+  }
+
+  Future<void> _checkAndStartTimerIfNeeded() async {
+    final state = await getOverrideState();
+    if (state.isInReflection || state.isOverrideActive) {
+      _startPeriodicCheck();
+    }
   }
 
   void _startPeriodicCheck() {
@@ -36,6 +44,11 @@ class EmergencyOverrideServiceImpl implements EmergencyOverrideService {
     _checkTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       checkStateAndProgress();
     });
+  }
+
+  void _stopPeriodicCheck() {
+    _checkTimer?.cancel();
+    _checkTimer = null;
   }
 
   @override
@@ -67,7 +80,9 @@ class EmergencyOverrideServiceImpl implements EmergencyOverrideService {
   @override
   Future<void> setRecoveryChallenge(String challenge, String plainAnswer) async {
     final normalized = plainAnswer.trim().toLowerCase();
-    final hashedAnswer = sha256.convert(utf8.encode(normalized)).toString();
+    // Use HMAC-SHA256 with the challenge as key to add uniqueness (pseudo-salt)
+    final hmacInstance = Hmac(sha256, utf8.encode(challenge));
+    final hashedAnswer = hmacInstance.convert(utf8.encode(normalized)).toString();
 
     final current = await _passwordService.getAdminSettings();
     if (current != null) {
@@ -97,7 +112,9 @@ class EmergencyOverrideServiceImpl implements EmergencyOverrideService {
     }
 
     final normalized = plainAnswer.trim().toLowerCase();
-    final hash = sha256.convert(utf8.encode(normalized)).toString();
+    final challenge = settings.recoveryChallenge ?? '';
+    final hmacInstance = Hmac(sha256, utf8.encode(challenge));
+    final hash = hmacInstance.convert(utf8.encode(normalized)).toString();
 
     if (settings.recoveryAnswerHash == hash) {
       final state = await getOverrideState();
@@ -117,6 +134,7 @@ class EmergencyOverrideServiceImpl implements EmergencyOverrideService {
         reflectionStartTime: now,
       );
       await _saveState(newState);
+      _startPeriodicCheck();
       AppLogger.info('Emergency override verified. Reflection timer started.');
       return true;
     }
@@ -142,6 +160,7 @@ class EmergencyOverrideServiceImpl implements EmergencyOverrideService {
       reflectionStartTime: null,
     );
     await _saveState(newState);
+    _stopPeriodicCheck();
     AppLogger.info('Emergency Override reflection timer cancelled.');
   }
 
@@ -217,6 +236,7 @@ class EmergencyOverrideServiceImpl implements EmergencyOverrideService {
       AppLogger.error('Failed to sync override deactivation to native', error: e);
     }
 
+    _stopPeriodicCheck();
     AppLogger.info('Emergency Override deactivated.');
 
     // If a Focus schedule should currently be active, start a new Focus Session

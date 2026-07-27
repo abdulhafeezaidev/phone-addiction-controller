@@ -270,7 +270,7 @@ class _AdminPasswordPageState extends ConsumerState<AdminPasswordPage> {
                           obscureText: _obscureNew,
                           style: const TextStyle(color: Color(0xFFE3E2E2)),
                           decoration: InputDecoration(
-                            hintText: 'Enter new password (min. 4 characters)',
+                            hintText: 'Enter new password (min. 6 characters)',
                             prefixIcon: const Icon(Icons.lock_rounded, color: Color(0xFFC6C5D5)),
                             suffixIcon: IconButton(
                               icon: Icon(_obscureNew ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: const Color(0xFFC6C5D5)),
@@ -278,8 +278,8 @@ class _AdminPasswordPageState extends ConsumerState<AdminPasswordPage> {
                             ),
                           ),
                           validator: (val) {
-                            if (val == null || val.length < 4) {
-                              return 'Password must be at least 4 characters';
+                            if (val == null || val.length < 6) {
+                              return 'Password must be at least 6 characters';
                             }
                             return null;
                           },
@@ -379,9 +379,9 @@ class _AdminPasswordPageState extends ConsumerState<AdminPasswordPage> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFCF6679).withOpacity(0.06),
+                    color: const Color(0xFFCF6679).withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: const Color(0xFFCF6679).withOpacity(0.3), width: 1),
+                    border: Border.all(color: const Color(0xFFCF6679).withValues(alpha: 0.3), width: 1),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -443,12 +443,20 @@ class _AdminPasswordPageState extends ConsumerState<AdminPasswordPage> {
         }
       }
 
-      await passwordService.setPassword(_newPasswordController.text);
+      // Capture values and clear controllers immediately to minimize
+      // time plain-text passwords spend in memory.
+      final newPassword = _newPasswordController.text;
+      final challenge = _recoveryChallengeController.text;
+      final answer = _recoveryAnswerController.text;
+      _currentPasswordController.clear();
+      _newPasswordController.clear();
+      _confirmPasswordController.clear();
+      _recoveryChallengeController.clear();
+      _recoveryAnswerController.clear();
+
+      await passwordService.setPassword(newPassword);
       final overrideService = ref.read(emergencyOverrideServiceProvider);
-      await overrideService.setRecoveryChallenge(
-        _recoveryChallengeController.text,
-        _recoveryAnswerController.text,
-      );
+      await overrideService.setRecoveryChallenge(challenge, answer);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -460,27 +468,41 @@ class _AdminPasswordPageState extends ConsumerState<AdminPasswordPage> {
         setState(() {
           _hasExistingPassword = true;
           _showForm = false;
-          _currentPasswordController.clear();
-          _newPasswordController.clear();
-          _confirmPasswordController.clear();
-          _recoveryChallengeController.clear();
-          _recoveryAnswerController.clear();
         });
       }
     }
   }
 
   void _removePassword() {
+    final removePasswordController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove Password?'),
-        content: const Text(
-          'This will disable administrator protection. Anyone will be able to disengage Focus Mode or bypass restrictions.',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'This will disable administrator protection. Enter your current password to confirm.',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: removePasswordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                hintText: 'Current password',
+                prefixIcon: Icon(Icons.lock_outline_rounded),
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              removePasswordController.dispose();
+              Navigator.pop(ctx);
+            },
             child: const Text('Cancel'),
           ),
           FilledButton(
@@ -488,20 +510,37 @@ class _AdminPasswordPageState extends ConsumerState<AdminPasswordPage> {
               backgroundColor: const Color(0xFFCF6679),
             ),
             onPressed: () async {
+              final enteredPassword = removePasswordController.text;
+              removePasswordController.clear();
+              removePasswordController.dispose();
               Navigator.pop(ctx);
+
+              if (enteredPassword.isEmpty) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Password is required to remove protection'),
+                      backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+                return;
+              }
+
               final passwordService = ref.read(passwordServiceProvider);
               final settings = await passwordService.getAdminSettings();
 
               if (settings != null) {
                 final isCorrect = passwordService.verifyPassword(
-                  _currentPasswordController.text,
+                  enteredPassword,
                   settings.passwordHash,
                 );
                 if (!isCorrect) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Enter correct current password to verify identity'),
+                        content: Text('Incorrect password'),
                         backgroundColor: Colors.red,
                         behavior: SnackBarBehavior.floating,
                       ),

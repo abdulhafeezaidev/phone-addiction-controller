@@ -105,12 +105,20 @@ class ScheduleServiceImpl implements ScheduleService {
       final eEndMinutes = existing.endTime.hour * 60 + existing.endTime.minute;
       final eIsOvernight = eStartMinutes >= eEndMinutes;
 
-      // Simplistic overlap check for now
+      // Proper overlap check supporting overnight ranges
       if (!isOvernight && !eIsOvernight) {
+        // Both are same-day: standard interval overlap
         if (startMinutes < eEndMinutes && endMinutes > eStartMinutes) return true;
+      } else if (isOvernight && !eIsOvernight) {
+        // New routine wraps midnight, existing is same-day
+        // Overnight [start..1440) + [0..end) overlaps existing [eStart..eEnd)?
+        if (eStartMinutes < endMinutes || eEndMinutes > startMinutes) return true;
+      } else if (!isOvernight && eIsOvernight) {
+        // Existing wraps midnight, new is same-day
+        if (startMinutes < eEndMinutes || endMinutes > eStartMinutes) return true;
       } else {
-        // Just return true if there's any complexity for now to be safe
-        return true; 
+        // Both overnight: they always overlap (both span midnight)
+        return true;
       }
     }
     return false;

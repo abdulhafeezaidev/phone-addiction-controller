@@ -275,8 +275,10 @@ class _PhoneAddictionControllerAppState
         final router = ref.read(appRouterProvider);
         router.push(RouteNames.blocked, extra: {'appName': appName});
       }
-    } catch (_) {
+    } on PlatformException {
       // No pending native event; normal startup.
+    } catch (e) {
+      AppLogger.warning('Unexpected error checking pending blocked event: $e');
     }
   }
 

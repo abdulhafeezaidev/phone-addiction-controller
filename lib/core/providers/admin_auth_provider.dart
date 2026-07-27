@@ -34,16 +34,24 @@ class AdminAuthController extends StateNotifier<AdminAuthState> {
   final PasswordService _passwordService;
   Timer? _lockTimer;
   Timer? _lockoutCheckTimer;
+  bool _disposed = false;
 
-  AdminAuthController(this._passwordService) : super(AdminAuthState()) {
-    _startLockoutChecks();
-  }
+  AdminAuthController(this._passwordService) : super(AdminAuthState());
 
+  /// Start lockout countdown. Only call when the user is actually locked out.
   void _startLockoutChecks() {
     _lockoutCheckTimer?.cancel();
     _lockoutCheckTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (_disposed) {
+        timer.cancel();
+        return;
+      }
       final remaining = await _passwordService.getRemainingLockoutDuration();
+      if (_disposed) return;
       state = state.copyWith(remainingLockout: remaining);
+      if (remaining == Duration.zero) {
+        timer.cancel();
+      }
     });
   }
 
@@ -67,7 +75,12 @@ class AdminAuthController extends StateNotifier<AdminAuthState> {
     } else {
       await _passwordService.recordFailedAttempt();
       final remaining = await _passwordService.getRemainingLockoutDuration();
-      state = state.copyWith(remainingLockout: remaining);
+      if (!_disposed) {
+        state = state.copyWith(remainingLockout: remaining);
+        if (remaining > Duration.zero) {
+          _startLockoutChecks();
+        }
+      }
       return false;
     }
   }
@@ -137,6 +150,7 @@ class AdminAuthController extends StateNotifier<AdminAuthState> {
 
   @override
   void dispose() {
+    _disposed = true;
     _lockTimer?.cancel();
     _lockoutCheckTimer?.cancel();
     super.dispose();

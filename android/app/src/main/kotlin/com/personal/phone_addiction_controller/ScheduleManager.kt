@@ -41,8 +41,11 @@ class ScheduleManager(private val context: Context) {
     fun scheduleRoutine(routineJson: String) {
         try {
             val json = JSONObject(routineJson)
-            val id = json.getString("id")
-            val enabled = json.getBoolean("enabled")
+            val id = json.optString("id", "").ifEmpty {
+                Log.e(TAG, "Routine JSON missing 'id' field — skipping")
+                return
+            }
+            val enabled = json.optBoolean("enabled", false)
 
             // Always save latest JSON to storage (even if disabled)
             saveRoutine(id, routineJson)
@@ -380,7 +383,10 @@ class ScheduleManager(private val context: Context) {
             Calendar.FRIDAY -> 4
             Calendar.SATURDAY -> 5
             Calendar.SUNDAY -> 6
-            else -> 0
+            else -> {
+                Log.w(TAG, "Unexpected calendar day value: $calendarDay, defaulting to Monday")
+                0
+            }
         }
     }
 

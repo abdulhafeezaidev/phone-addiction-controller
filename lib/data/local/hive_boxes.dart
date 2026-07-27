@@ -69,6 +69,7 @@ class HiveBoxes {
   }
 
   /// Opens a Hive box safely. Checks if already open first to avoid HiveError.
+  /// If the box is corrupted, backs up the old file before deleting and recreating.
   static Future<Box<T>> _openBoxSafely<T>(String boxName) async {
     try {
       if (Hive.isBoxOpen(boxName)) {
@@ -76,8 +77,11 @@ class HiveBoxes {
       }
       return await Hive.openBox<T>(boxName);
     } catch (e) {
-      AppLogger.error('Failed to open box "$boxName", attempting disk recovery',
-          error: e);
+      AppLogger.error(
+        'Failed to open box "$boxName" — data in this box will be reset. '
+        'Cause: ${e.runtimeType}',
+        error: e,
+      );
       try {
         await Hive.deleteBoxFromDisk(boxName);
         return await Hive.openBox<T>(boxName);
