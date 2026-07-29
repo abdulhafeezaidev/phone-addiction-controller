@@ -58,6 +58,15 @@ class _ControlCenterOverlayState extends ConsumerState<ControlCenterOverlay>
       curve: Curves.easeOut,
     ));
 
+    if (widget.isShown) {
+      _startTimeTimer();
+      _animationController.forward();
+    }
+  }
+
+  void _startTimeTimer() {
+    _timeTimer?.cancel();
+    _currentTime = DateTime.now();
     _timeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
@@ -65,10 +74,11 @@ class _ControlCenterOverlayState extends ConsumerState<ControlCenterOverlay>
         });
       }
     });
+  }
 
-    if (widget.isShown) {
-      _animationController.forward();
-    }
+  void _stopTimeTimer() {
+    _timeTimer?.cancel();
+    _timeTimer = null;
   }
 
   @override
@@ -76,10 +86,12 @@ class _ControlCenterOverlayState extends ConsumerState<ControlCenterOverlay>
     super.didUpdateWidget(oldWidget);
     if (widget.isShown != oldWidget.isShown) {
       if (widget.isShown) {
+        _startTimeTimer();
         ref.read(controlCenterProvider.notifier).refreshData();
         _animationController.forward();
       } else {
         _animationController.reverse();
+        _stopTimeTimer();
       }
     }
   }

@@ -139,7 +139,9 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
             await _checkActiveSession();
           },
           child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast),
+            ),
             slivers: [
               // Header Row with Logo
               SliverToBoxAdapter(
@@ -171,14 +173,6 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                         ),
                       ),
                       const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.menu_rounded, color: Color(0xFFC6C5D5)),
-                        onPressed: () {
-                          setState(() {
-                            _showControlCenter = true;
-                          });
-                        },
-                      ),
                       IconButton(
                         icon: const Icon(Icons.person_outline_rounded, color: Color(0xFFC6C5D5)),
                         onPressed: () => context.push(RouteNames.adminPassword),
@@ -407,9 +401,27 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                   color: const Color(0xFFE3E2E2),
                 ),
               ),
-              const Icon(
-                Icons.more_horiz_rounded,
-                color: Color(0xFFC6C5D5),
+              GestureDetector(
+                onTap: () => context.push(RouteNames.statistics),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'View All',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF5E6AD2),
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Color(0xFF5E6AD2),
+                      size: 12,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

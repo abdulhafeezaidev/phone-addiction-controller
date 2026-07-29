@@ -499,10 +499,7 @@ class _AdminPasswordPageState extends ConsumerState<AdminPasswordPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              removePasswordController.dispose();
-              Navigator.pop(ctx);
-            },
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel'),
           ),
           FilledButton(
@@ -511,13 +508,10 @@ class _AdminPasswordPageState extends ConsumerState<AdminPasswordPage> {
             ),
             onPressed: () async {
               final enteredPassword = removePasswordController.text;
-              removePasswordController.clear();
-              removePasswordController.dispose();
-              Navigator.pop(ctx);
 
               if (enteredPassword.isEmpty) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
                     const SnackBar(
                       content: Text('Password is required to remove protection'),
                       backgroundColor: Colors.red,
@@ -528,52 +522,70 @@ class _AdminPasswordPageState extends ConsumerState<AdminPasswordPage> {
                 return;
               }
 
-              final passwordService = ref.read(passwordServiceProvider);
-              final settings = await passwordService.getAdminSettings();
+              try {
+                final passwordService = ref.read(passwordServiceProvider);
+                final settings = await passwordService.getAdminSettings();
 
-              if (settings != null) {
-                final isCorrect = passwordService.verifyPassword(
-                  enteredPassword,
-                  settings.passwordHash,
-                );
-                if (!isCorrect) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Incorrect password'),
-                        backgroundColor: Colors.red,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                if (settings != null) {
+                  final isCorrect = passwordService.verifyPassword(
+                    enteredPassword,
+                    settings.passwordHash,
+                  );
+                  if (!isCorrect) {
+                    if (ctx.mounted) {
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Password is incorrect'),
+                          backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                    return;
                   }
-                  return;
                 }
-              }
 
-              // Delete admin settings key
-              await ref.read(storageServiceProvider).delete(
-                AppConstants.adminSettingsBox,
-                AppConstants.adminPasswordKey,
-              );
-
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Administrator password disabled'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
+                await ref.read(storageServiceProvider).delete(
+                  AppConstants.adminSettingsBox,
+                  AppConstants.adminPasswordKey,
                 );
-                setState(() {
-                  _hasExistingPassword = false;
-                  _showForm = false;
-                  _currentPasswordController.clear();
-                });
+
+                if (ctx.mounted) Navigator.pop(ctx);
+
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Password removed successfully'),
+                      backgroundColor: Color(0xFF4CAF7D),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  setState(() {
+                    _hasExistingPassword = false;
+                    _showForm = false;
+                    _currentPasswordController.clear();
+                  });
+                }
+              } catch (_) {
+                if (ctx.mounted) Navigator.pop(ctx);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Something went wrong. Please try again.'),
+                      backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
               }
             },
             child: const Text('Remove'),
           ),
         ],
       ),
-    );
+    ).then((_) {
+      removePasswordController.dispose();
+    });
   }
 }

@@ -14,7 +14,14 @@ class ScaffoldWithNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
+    return PopScope(
+      canPop: navigationShell.currentIndex == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          navigationShell.goBranch(0);
+        }
+      },
+      child: Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -57,6 +64,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

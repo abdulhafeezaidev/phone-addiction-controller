@@ -293,6 +293,19 @@ class _PhoneAddictionControllerAppState
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.dark,
       routerConfig: router,
+      scrollBehavior: const _SmoothScrollBehavior(),
+    );
+  }
+}
+
+/// Custom scroll behavior that applies smooth bouncing physics app-wide.
+class _SmoothScrollBehavior extends MaterialScrollBehavior {
+  const _SmoothScrollBehavior();
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics(
+      decelerationRate: ScrollDecelerationRate.fast,
     );
   }
 }

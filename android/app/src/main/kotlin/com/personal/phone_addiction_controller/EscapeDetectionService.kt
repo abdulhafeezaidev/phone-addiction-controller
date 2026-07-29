@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.util.LruCache
+import java.util.LinkedHashMap
 
 data class ForegroundApp(
     val packageName: String,
@@ -39,13 +39,13 @@ class EscapeDetectionService(private val context: Context) {
     }
 
     private val policyEngine = FocusPolicyEngine(context)
-    private val appNameCache = object : LruCache<String, String>(200) {
-        @Synchronized
-        override fun get(key: String?): String? = super.get(key)
-
-        @Synchronized
-        override fun put(key: String?, value: String?): String? = super.put(key, value)
-    }
+    private val appNameCache = java.util.Collections.synchronizedMap(
+        object : LinkedHashMap<String, String>(200, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?): Boolean {
+                return size > 200
+            }
+        }
+    )
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private var listener: AppChangeListener? = null

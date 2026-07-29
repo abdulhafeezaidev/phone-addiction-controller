@@ -47,7 +47,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     final isDeviceOwner =
         ref.watch(isDeviceOwnerProvider).valueOrNull ?? false;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go(RouteNames.home);
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFF121414),
       appBar: AppBar(
         title: const Text('Settings'),
@@ -377,6 +382,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -491,7 +497,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             child: Switch(
               value: value,
               onChanged: enabled ? onChanged : null,
-              activeThumbColor: const Color(0xFF5E6AD2),
+              thumbColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) return const Color(0xFF636363);
+                if (states.contains(WidgetState.selected)) return Colors.white;
+                return const Color(0xFF9E9E9E);
+              }),
+              trackColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) return const Color(0xFF1A1A1A);
+                if (states.contains(WidgetState.selected)) return const Color(0xFF5E6AD2);
+                return const Color(0xFF2C2C2E);
+              }),
+              trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) return Colors.transparent;
+                return const Color(0xFF4A4A4C);
+              }),
             ),
           ),
         ],

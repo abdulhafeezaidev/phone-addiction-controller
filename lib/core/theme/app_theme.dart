@@ -164,12 +164,30 @@ class AppTheme {
       // Switch
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return isDark ? const Color(0xFF636363) : const Color(0xFFAAAAAA);
+          }
           if (states.contains(WidgetState.selected)) return Colors.white;
-          return null;
+          return isDark ? const Color(0xFF9E9E9E) : const Color(0xFF757575);
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return isDark ? const Color(0xFF1A1A1A) : const Color(0xFFD0D0D0);
+          }
           if (states.contains(WidgetState.selected)) return _primarySeed;
-          return null;
+          return isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE0E0E0);
+        }),
+        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.transparent;
+          return isDark ? const Color(0xFF4A4A4C) : const Color(0xFFBDBDBD);
+        }),
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return _primarySeed.withValues(alpha: 0.12);
+          }
+          return isDark
+              ? const Color(0xFF9E9E9E).withValues(alpha: 0.12)
+              : const Color(0xFF757575).withValues(alpha: 0.12);
         }),
       ),
       // FloatingActionButton
