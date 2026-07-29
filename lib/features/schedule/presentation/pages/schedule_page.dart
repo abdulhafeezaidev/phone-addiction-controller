@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../widgets/section_header.dart';
+import '../../../../core/constants/route_names.dart';
 import '../../../../core/providers/schedule_providers.dart';
+import '../../../../core/providers/service_providers.dart';
 import '../../../../core/providers/admin_auth_provider.dart';
 import '../../../../core/providers/focus_providers.dart';
 import '../../../../domain/models/routine.dart';
@@ -16,7 +18,12 @@ class SchedulePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final routinesAsync = ref.watch(routinesProvider);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go(RouteNames.home);
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFF121414),
       body: SafeArea(
         child: CustomScrollView(
@@ -95,10 +102,7 @@ class SchedulePage extends ConsumerWidget {
                             ref.read(routinesProvider.notifier).deleteRoutine(routine.id);
                           }
                         },
-                      ).animate().fadeIn(
-                            delay: Duration(milliseconds: index * 80),
-                            duration: 300.ms,
-                          );
+                      );
                     },
                     childCount: routines.length,
                   ),
@@ -118,6 +122,7 @@ class SchedulePage extends ConsumerWidget {
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -143,7 +148,7 @@ class SchedulePage extends ConsumerWidget {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 400.ms);
+    );
   }
 
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
@@ -191,13 +196,28 @@ class SchedulePage extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => _AddEditRoutineSheet(existingRoutine: existing),
-    ).then((routine) {
-      if (routine != null) {
-        if (existing != null) {
-          ref.read(routinesProvider.notifier).updateRoutine(routine);
-        } else {
-          ref.read(routinesProvider.notifier).addRoutine(routine);
-        }
+    ).then((routine) async {
+      if (routine == null) return;
+
+      // Check for schedule overlap before saving
+      final scheduleService = ref.read(scheduleServiceProvider);
+      final hasOverlap = await scheduleService.hasOverlappingRoutines(routine);
+
+      if (hasOverlap && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('This routine overlaps with an existing enabled routine. Please adjust the time or days.'),
+            backgroundColor: Color(0xFFCF6679),
+            duration: Duration(seconds: 4),
+          ),
+        );
+        return;
+      }
+
+      if (existing != null) {
+        ref.read(routinesProvider.notifier).updateRoutine(routine);
+      } else {
+        ref.read(routinesProvider.notifier).addRoutine(routine);
       }
     });
   }
@@ -280,7 +300,18 @@ class _RoutineCard extends StatelessWidget {
               Switch(
                 value: routine.enabled,
                 onChanged: onToggle,
-                activeThumbColor: const Color(0xFF5E6AD2),
+                thumbColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) return Colors.white;
+                  return const Color(0xFF9E9E9E);
+                }),
+                trackColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) return const Color(0xFF5E6AD2);
+                  return const Color(0xFF2C2C2E);
+                }),
+                trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) return Colors.transparent;
+                  return const Color(0xFF4A4A4C);
+                }),
               ),
             ],
           ),

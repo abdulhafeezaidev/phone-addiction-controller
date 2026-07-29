@@ -407,7 +407,9 @@ object FlutterBridge {
                 "getControlCenterData" -> {
                     try {
                         val bm = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-                        val batteryLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                        val batteryLevel = try {
+                            bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                        } catch (_: Exception) { -1 }
 
                         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
                         val wifiEnabled = wifiManager.isWifiEnabled
@@ -773,24 +775,36 @@ object FlutterBridge {
         }
     }
 
+    private const val MAX_ICON_SIZE = 96
+
     private fun getIconBytes(pm: PackageManager, packageName: String): ByteArray? {
         return try {
             val drawable = pm.getApplicationIcon(packageName)
             val bitmap = drawableToBitmap(drawable)
             val stream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 80, stream)
-            stream.toByteArray()
+            val bytes = stream.toByteArray()
+            if (bitmap !== (drawable as? BitmapDrawable)?.bitmap) {
+                bitmap.recycle()
+            }
+            bytes
         } catch (e: Exception) {
             null
         }
     }
 
     private fun drawableToBitmap(drawable: Drawable): Bitmap {
-        if (drawable is BitmapDrawable) {
+        if (drawable is BitmapDrawable && drawable.bitmap.width <= MAX_ICON_SIZE) {
             return drawable.bitmap
         }
-        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 48
-        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 48
+        val srcWidth = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 48
+        val srcHeight = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 48
+        // Scale down large icons to prevent OOM
+        val scale = if (srcWidth > MAX_ICON_SIZE || srcHeight > MAX_ICON_SIZE) {
+            MAX_ICON_SIZE.toFloat() / maxOf(srcWidth, srcHeight)
+        } else 1f
+        val width = (srcWidth * scale).toInt()
+        val height = (srcHeight * scale).toInt()
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)

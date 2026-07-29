@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /c/Users/faiza/OneDrive/Documents/focusos/lib/**/*.dart)",
+      "Bash(flutter analyze:*)"
+    ]
+  }
+}

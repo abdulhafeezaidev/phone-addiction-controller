@@ -115,6 +115,7 @@ object FocusModeManager {
             }
         }
 
+    @Synchronized
     fun isEmergencyOverrideActive(): Boolean {
         if (!emergencyOverrideActive) return false
         val exp = emergencyOverrideExpirationTime

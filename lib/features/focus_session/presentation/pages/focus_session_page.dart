@@ -782,7 +782,9 @@ class _FocusSessionPageState extends ConsumerState<FocusSessionPage>
                       return false;
                     },
                     child: CustomScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast),
+                      ),
                       slivers: [
                       // ── Always Allowed: System Apps ──────────────────────
                       if (systemApps.isNotEmpty) ...[

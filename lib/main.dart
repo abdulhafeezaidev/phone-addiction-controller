@@ -275,8 +275,10 @@ class _PhoneAddictionControllerAppState
         final router = ref.read(appRouterProvider);
         router.push(RouteNames.blocked, extra: {'appName': appName});
       }
-    } catch (_) {
+    } on PlatformException {
       // No pending native event; normal startup.
+    } catch (e) {
+      AppLogger.warning('Unexpected error checking pending blocked event: $e');
     }
   }
 
@@ -291,6 +293,19 @@ class _PhoneAddictionControllerAppState
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.dark,
       routerConfig: router,
+      scrollBehavior: const _SmoothScrollBehavior(),
+    );
+  }
+}
+
+/// Custom scroll behavior that applies smooth bouncing physics app-wide.
+class _SmoothScrollBehavior extends MaterialScrollBehavior {
+  const _SmoothScrollBehavior();
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics(
+      decelerationRate: ScrollDecelerationRate.fast,
     );
   }
 }

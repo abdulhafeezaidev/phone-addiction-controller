@@ -16,7 +16,7 @@ class PasswordServiceImpl implements PasswordService {
   PasswordServiceImpl(this._storageService);
 
   static const Duration _lockoutDuration = Duration(seconds: 30);
-  static const int _iterations = 1000;
+  static const int _iterations = 100000;
 
   @override
   String hashPassword(String plainPassword) {
@@ -50,7 +50,17 @@ class PasswordServiceImpl implements PasswordService {
     final hashHex = parts[1];
 
     final calculatedHash = _pbkdf2Like(plainPassword, saltHex);
-    return calculatedHash == hashHex;
+    return _constantTimeEquals(calculatedHash, hashHex);
+  }
+
+  /// Constant-time comparison to prevent timing attacks.
+  bool _constantTimeEquals(String a, String b) {
+    if (a.length != b.length) return false;
+    var result = 0;
+    for (var i = 0; i < a.length; i++) {
+      result |= a.codeUnitAt(i) ^ b.codeUnitAt(i);
+    }
+    return result == 0;
   }
 
   @override

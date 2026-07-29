@@ -88,32 +88,47 @@ class ScheduleServiceImpl implements ScheduleService {
   @override
   Future<bool> hasOverlappingRoutines(Routine routine) async {
     final routines = await getRoutines();
-    
-    // Convert to minute of day for easy comparison
-    final startMinutes = routine.startTime.hour * 60 + routine.startTime.minute;
-    final endMinutes = routine.endTime.hour * 60 + routine.endTime.minute;
-    final isOvernight = startMinutes >= endMinutes;
 
     for (final existing in routines) {
-      if (existing.id == routine.id || !existing.enabled) continue;
+      // Only skip self (when editing)
+      if (existing.id == routine.id) continue;
 
       // Check for shared days
       final hasSharedDays = routine.weekdays.any((d) => existing.weekdays.contains(d));
       if (!hasSharedDays) continue;
 
-      final eStartMinutes = existing.startTime.hour * 60 + existing.startTime.minute;
-      final eEndMinutes = existing.endTime.hour * 60 + existing.endTime.minute;
-      final eIsOvernight = eStartMinutes >= eEndMinutes;
-
-      // Simplistic overlap check for now
-      if (!isOvernight && !eIsOvernight) {
-        if (startMinutes < eEndMinutes && endMinutes > eStartMinutes) return true;
-      } else {
-        // Just return true if there's any complexity for now to be safe
-        return true; 
+      // Check all slots of new routine against all slots of existing routine
+      for (final newSlot in routine.slots) {
+        for (final existingSlot in existing.slots) {
+          if (_slotsOverlap(newSlot, existingSlot)) return true;
+        }
       }
     }
     return false;
+  }
+
+  bool _slotsOverlap(TimeSlot a, TimeSlot b) {
+    final aStart = a.startHour * 60 + a.startMinute;
+    final aEnd = a.endHour * 60 + a.endMinute;
+    final bStart = b.startHour * 60 + b.startMinute;
+    final bEnd = b.endHour * 60 + b.endMinute;
+
+    final aOvernight = aStart >= aEnd;
+    final bOvernight = bStart >= bEnd;
+
+    if (!aOvernight && !bOvernight) {
+      // Both same-day: standard interval overlap
+      return aStart < bEnd && aEnd > bStart;
+    } else if (aOvernight && !bOvernight) {
+      // a wraps midnight, b is same-day
+      return bStart < aEnd || bEnd > aStart;
+    } else if (!aOvernight && bOvernight) {
+      // b wraps midnight, a is same-day
+      return aStart < bEnd || aEnd > bStart;
+    } else {
+      // Both overnight: always overlap
+      return true;
+    }
   }
 
   @override

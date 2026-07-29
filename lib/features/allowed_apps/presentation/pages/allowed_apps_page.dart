@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../domain/models/allowed_app.dart';
+import '../../../../core/constants/route_names.dart';
 import '../../../../core/providers/service_providers.dart';
 import '../../../../core/providers/focus_providers.dart';
 import '../../../../core/providers/admin_auth_provider.dart';
@@ -27,56 +28,55 @@ class _AllowedAppsPageState extends ConsumerState<AllowedAppsPage> {
     'contacts' // Contacts
   };
 
+  static final Set<String> _systemPackages = {
+    'com.android.phone',
+    'com.android.server.telecom',
+    'com.android.telecom',
+    'com.android.dialer',
+    'com.android.incallui',
+    'com.android.phone.slice',
+    'com.samsung.android.incallui',
+    'com.samsung.android.dialer',
+    'com.samsung.android.app.telephonyui',
+    'com.samsung.android.telecom',
+    'com.samsung.android.phone',
+    'com.google.android.dialer',
+    'com.android.contacts',
+    'com.samsung.android.contacts',
+    'com.google.android.contacts',
+    'com.android.providers.contacts',
+    'com.android.mms',
+    'com.samsung.android.messaging',
+    'com.google.android.apps.messaging',
+    'com.android.providers.telephony',
+    'com.android.camera',
+    'com.android.camera2',
+    'com.sec.android.app.camera',
+    'com.samsung.android.app.camera',
+    'com.google.android.GoogleCamera',
+    'com.samsung.android.cameralite',
+    'com.android.calculator2',
+    'com.sec.android.app.popupcalculator',
+    'com.samsung.android.calculator',
+    'com.google.android.calculator',
+    'com.android.deskclock',
+    'com.sec.android.app.clockpackage',
+    'com.samsung.android.app.clockpackage',
+    'com.google.android.deskclock',
+    'com.android.documentsui',
+    'com.android.providers.downloads',
+    'com.android.providers.downloads.ui',
+    'com.android.providers.media',
+    'com.android.externalstorage',
+    'com.sec.android.app.myfiles',
+    'com.google.android.apps.nbu.files',
+    'com.samsung.android.app.myfiles',
+  };
+
   bool _isAlwaysAllowedApp(String packageName) {
     final pkg = packageName.toLowerCase();
-    
-    // Exact package names check matching native implementation
-    final incallPackages = {
-      'com.android.phone',
-      'com.android.server.telecom',
-      'com.android.telecom',
-      'com.android.dialer',
-      'com.android.incallui',
-      'com.android.phone.slice',
-      'com.samsung.android.incallui',
-      'com.samsung.android.dialer',
-      'com.samsung.android.app.telephonyui',
-      'com.samsung.android.telecom',
-      'com.samsung.android.phone',
-      'com.google.android.dialer',
-      'com.android.contacts',
-      'com.samsung.android.contacts',
-      'com.google.android.contacts',
-      'com.android.providers.contacts',
-      'com.android.mms',
-      'com.samsung.android.messaging',
-      'com.google.android.apps.messaging',
-      'com.android.providers.telephony',
-      'com.android.camera',
-      'com.android.camera2',
-      'com.sec.android.app.camera',
-      'com.samsung.android.app.camera',
-      'com.google.android.GoogleCamera',
-      'com.samsung.android.cameralite',
-      'com.android.calculator2',
-      'com.sec.android.app.popupcalculator',
-      'com.samsung.android.calculator',
-      'com.google.android.calculator',
-      'com.android.deskclock',
-      'com.sec.android.app.clockpackage',
-      'com.samsung.android.app.clockpackage',
-      'com.google.android.deskclock',
-      'com.android.documentsui',
-      'com.android.providers.downloads',
-      'com.android.providers.downloads.ui',
-      'com.android.providers.media',
-      'com.android.externalstorage',
-      'com.sec.android.app.myfiles',
-      'com.google.android.apps.nbu.files',
-      'com.samsung.android.app.myfiles',
-    };
 
-    if (incallPackages.contains(pkg)) return true;
+    if (_systemPackages.contains(pkg)) return true;
 
     // Fallback keyword search for custom vendor names
     for (final kw in _alwaysAllowedKeywords) {
@@ -103,7 +103,12 @@ class _AllowedAppsPageState extends ConsumerState<AllowedAppsPage> {
     final allowedApps = allowedAppsAsync.valueOrNull ?? const <AllowedApp>[];
     final allowedPackages = allowedApps.map((app) => app.packageName).toSet();
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go(RouteNames.home);
+      },
+      child: Scaffold(
       body: SafeArea(
         child: Column(
           children: [
@@ -128,6 +133,22 @@ class _AllowedAppsPageState extends ConsumerState<AllowedAppsPage> {
                   }
                 }
 
+                final isFocusActive = ref.watch(focusModeProvider);
+                final items = <_ListItem>[];
+
+                if (alwaysAllowedSection.isNotEmpty) {
+                  items.add(_ListItem.header(isSystem: true));
+                  for (final app in alwaysAllowedSection) {
+                    items.add(_ListItem.app(app, isSystem: true));
+                  }
+                }
+                if (thirdPartySection.isNotEmpty) {
+                  items.add(_ListItem.header(isSystem: false));
+                  for (final app in thirdPartySection) {
+                    items.add(_ListItem.app(app, isSystem: false));
+                  }
+                }
+
                 return Expanded(
                   child: Column(
                     children: [
@@ -135,87 +156,50 @@ class _AllowedAppsPageState extends ConsumerState<AllowedAppsPage> {
                       Expanded(
                         child: filtered.isEmpty
                             ? _buildEmptyState(context)
-                            : ListView(
+                            : ListView.builder(
                                 padding: const EdgeInsets.only(bottom: 100),
-                                children: [
-                                  if (alwaysAllowedSection.isNotEmpty) ...[
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                                      child: Row(
-                                        children: [
-                                          const Icon(Icons.security_rounded, size: 16, color: Color(0xFF5E6AD2)),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'ALWAYS ALLOWED',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              letterSpacing: 1.2,
-                                              color: const Color(0xFF5E6AD2).withOpacity(0.9),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    ...alwaysAllowedSection.map((app) {
-                                      return _AppTile(
-                                        app: app,
-                                        isAllowed: true,
-                                        isSystemAlwaysAllowed: true,
-                                        onToggle: (_) {},
-                                      );
-                                    }),
-                                  ],
-                                  if (thirdPartySection.isNotEmpty) ...[
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.apps_rounded, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'THIRD-PARTY APPS',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              letterSpacing: 1.2,
-                                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.8),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    ...thirdPartySection.map((app) {
-                                      final isAllowed = allowedPackages.contains(app.packageName);
-                                      final isFocusActive = ref.watch(focusModeProvider);
-                                      return _AppTile(
-                                        app: app,
-                                        isAllowed: isAllowed,
-                                        showLock: isFocusActive,
-                                        onToggle: (val) async {
-                                          final authService = ref.read(authorizationServiceProvider);
-                                          final canEdit = await authService.canEditAllowedApps(isFocusActive: isFocusActive);
+                                itemCount: items.length,
+                                itemBuilder: (context, index) {
+                                  final item = items[index];
+                                  if (item.isHeader) {
+                                    return _buildSectionHeader(context, isSystem: item.isSystem);
+                                  }
+                                  final app = item.app!;
+                                  if (item.isSystem) {
+                                    return _AppTile(
+                                      app: app,
+                                      isAllowed: true,
+                                      isSystemAlwaysAllowed: true,
+                                      onToggle: (_) {},
+                                    );
+                                  }
+                                  final isAllowed = allowedPackages.contains(app.packageName);
+                                  return _AppTile(
+                                    app: app,
+                                    isAllowed: isAllowed,
+                                    showLock: isFocusActive,
+                                    onToggle: (val) async {
+                                      final authService = ref.read(authorizationServiceProvider);
+                                      final canEdit = await authService.canEditAllowedApps(isFocusActive: isFocusActive);
 
-                                          final action = () async {
-                                            await ref
-                                                .read(allowedAppsControllerProvider)
-                                                .toggleAllowedApp(app, val);
-                                          };
+                                      final action = () async {
+                                        await ref
+                                            .read(allowedAppsControllerProvider)
+                                            .toggleAllowedApp(app, val);
+                                      };
 
-                                          if (canEdit) {
-                                            await action();
-                                          } else {
-                                            if (context.mounted) {
-                                              await ref
-                                                  .read(adminAuthProvider.notifier)
-                                                  .runProtectedAction(context, action);
-                                            }
-                                          }
-                                        },
-                                      );
-                                    }),
-                                  ],
-                                ],
+                                      if (canEdit) {
+                                        await action();
+                                      } else {
+                                        if (context.mounted) {
+                                          await ref
+                                              .read(adminAuthProvider.notifier)
+                                              .runProtectedAction(context, action);
+                                        }
+                                      }
+                                    },
+                                  );
+                                },
                               ),
                       ),
                     ],
@@ -227,6 +211,48 @@ class _AllowedAppsPageState extends ConsumerState<AllowedAppsPage> {
             ),
           ],
         ),
+      ),
+    ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, {required bool isSystem}) {
+    if (isSystem) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        child: Row(
+          children: [
+            const Icon(Icons.security_rounded, size: 16, color: Color(0xFF5E6AD2)),
+            const SizedBox(width: 8),
+            Text(
+              'ALWAYS ALLOWED',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+                color: const Color(0xFF5E6AD2).withValues(alpha: 0.9),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      child: Row(
+        children: [
+          Icon(Icons.apps_rounded, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Text(
+            'THIRD-PARTY APPS',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -262,7 +288,7 @@ class _AllowedAppsPageState extends ConsumerState<AllowedAppsPage> {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 400.ms);
+    );
   }
 
   Widget _buildSearchBar(BuildContext context) {
@@ -285,7 +311,7 @@ class _AllowedAppsPageState extends ConsumerState<AllowedAppsPage> {
               : null,
         ),
       ),
-    ).animate().fadeIn(delay: 100.ms, duration: 300.ms);
+    );
   }
 
   Widget _buildStats(BuildContext context, int totalApps, int allowedCount) {
@@ -338,7 +364,7 @@ class _ChipStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -373,7 +399,8 @@ class _AppTile extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return Card(
+    return RepaintBoundary(
+      child: Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
@@ -383,8 +410,8 @@ class _AppTile extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 color: isSystemAlwaysAllowed
-                    ? const Color(0xFF5E6AD2).withOpacity(0.12)
-                    : (isAllowed ? const Color(0xFF4CAF7D).withOpacity(0.12) : cs.surfaceVariant),
+                    ? const Color(0xFF5E6AD2).withValues(alpha: 0.12)
+                    : (isAllowed ? const Color(0xFF4CAF7D).withValues(alpha: 0.12) : cs.surfaceContainerHighest),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: app.icon != null
@@ -393,6 +420,9 @@ class _AppTile extends StatelessWidget {
                       child: Image.memory(
                         app.icon!,
                         fit: BoxFit.cover,
+                        cacheWidth: 88,
+                        cacheHeight: 88,
+                        gaplessPlayback: true,
                       ),
                     )
                   : Icon(
@@ -428,7 +458,7 @@ class _AppTile extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF5E6AD2).withOpacity(0.12),
+                  color: const Color(0xFF5E6AD2).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: const Text(
@@ -448,11 +478,39 @@ class _AppTile extends StatelessWidget {
               Switch(
                 value: isAllowed,
                 onChanged: onToggle,
+                thumbColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) return Colors.white;
+                  return const Color(0xFF9E9E9E);
+                }),
+                trackColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) return const Color(0xFF5E6AD2);
+                  return const Color(0xFF2C2C2E);
+                }),
+                trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) return Colors.transparent;
+                  return const Color(0xFF4A4A4C);
+                }),
               ),
             ],
           ],
         ),
       ),
+    ),
     );
   }
+}
+
+/// Lightweight descriptor for items in the flat list (header or app tile).
+class _ListItem {
+  final bool isHeader;
+  final bool isSystem;
+  final AllowedApp? app;
+
+  const _ListItem._({required this.isHeader, required this.isSystem, this.app});
+
+  factory _ListItem.header({required bool isSystem}) =>
+      _ListItem._(isHeader: true, isSystem: isSystem);
+
+  factory _ListItem.app(AllowedApp app, {required bool isSystem}) =>
+      _ListItem._(isHeader: false, isSystem: isSystem, app: app);
 }
