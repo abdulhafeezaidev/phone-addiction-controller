@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// Structured logging utility for Focus Guard.
+/// Structured logging utility for Detox.
 ///
 /// Debug builds: detailed logs.
 /// Release builds: minimal logs (errors only).

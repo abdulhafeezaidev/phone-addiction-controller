@@ -24,13 +24,15 @@ class AdminSettingsAdapter extends TypeAdapter<AdminSettings> {
       failedAttemptCount: fields[4] as int,
       recoveryChallenge: fields[5] as String?,
       recoveryAnswerHash: fields[6] as String?,
+      adminName: fields[7] as String?,
+      adminContact: fields[8] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, AdminSettings obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.passwordHash)
       ..writeByte(1)
@@ -44,7 +46,11 @@ class AdminSettingsAdapter extends TypeAdapter<AdminSettings> {
       ..writeByte(5)
       ..write(obj.recoveryChallenge)
       ..writeByte(6)
-      ..write(obj.recoveryAnswerHash);
+      ..write(obj.recoveryAnswerHash)
+      ..writeByte(7)
+      ..write(obj.adminName)
+      ..writeByte(8)
+      ..write(obj.adminContact);
   }
 
   @override

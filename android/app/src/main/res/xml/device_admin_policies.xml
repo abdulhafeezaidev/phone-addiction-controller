@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- No device policies are requested. Being an active device admin is only used so that
+     Android refuses to uninstall the app until the admin deactivates it. -->
 <device-admin xmlns:android="http://schemas.android.com/apk/res/android">
-    <uses-policies>
-        <force-lock />
-    </uses-policies>
+    <uses-policies />
 </device-admin>

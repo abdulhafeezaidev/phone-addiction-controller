@@ -3,25 +3,16 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i6;
+import 'dart:async' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
+import 'package:mockito/src/dummies.dart' as _i6;
 import 'package:phone_addiction_controller/domain/models/admin_settings.dart'
     as _i2;
-import 'package:phone_addiction_controller/domain/models/focus_session_snapshot.dart'
-    as _i4;
-import 'package:phone_addiction_controller/domain/models/routine.dart' as _i3;
-import 'package:phone_addiction_controller/domain/models/time_slot.dart'
-    as _i10;
-import 'package:phone_addiction_controller/services/interfaces/focus_session_manager.dart'
-    as _i11;
 import 'package:phone_addiction_controller/services/interfaces/password_service.dart'
-    as _i7;
-import 'package:phone_addiction_controller/services/interfaces/schedule_service.dart'
-    as _i9;
-import 'package:phone_addiction_controller/services/interfaces/storage_service.dart'
     as _i5;
+import 'package:phone_addiction_controller/services/interfaces/storage_service.dart'
+    as _i3;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -56,33 +47,12 @@ class _FakeDuration_1 extends _i1.SmartFake implements Duration {
         );
 }
 
-class _FakeRoutine_2 extends _i1.SmartFake implements _i3.Routine {
-  _FakeRoutine_2(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
-class _FakeFocusSessionSnapshot_3 extends _i1.SmartFake
-    implements _i4.FocusSessionSnapshot {
-  _FakeFocusSessionSnapshot_3(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
 /// A class which mocks [StorageService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockStorageService extends _i1.Mock implements _i5.StorageService {
+class MockStorageService extends _i1.Mock implements _i3.StorageService {
   @override
-  _i6.Future<void> put<T>(
+  _i4.Future<void> put<T>(
     String? boxName,
     String? key,
     T? value,
@@ -96,9 +66,9 @@ class MockStorageService extends _i1.Mock implements _i5.StorageService {
             value,
           ],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
   T? get<T>(
@@ -119,7 +89,7 @@ class MockStorageService extends _i1.Mock implements _i5.StorageService {
       ) as T?);
 
   @override
-  _i6.Future<void> delete(
+  _i4.Future<void> delete(
     String? boxName,
     String? key,
   ) =>
@@ -131,9 +101,9 @@ class MockStorageService extends _i1.Mock implements _i5.StorageService {
             key,
           ],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
   List<T> getAll<T>(String? boxName) => (super.noSuchMethod(
@@ -146,14 +116,14 @@ class MockStorageService extends _i1.Mock implements _i5.StorageService {
       ) as List<T>);
 
   @override
-  _i6.Future<void> clearBox(String? boxName) => (super.noSuchMethod(
+  _i4.Future<void> clearBox(String? boxName) => (super.noSuchMethod(
         Invocation.method(
           #clearBox,
           [boxName],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
   bool containsKey(
@@ -176,21 +146,21 @@ class MockStorageService extends _i1.Mock implements _i5.StorageService {
 /// A class which mocks [PasswordService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockPasswordService extends _i1.Mock implements _i7.PasswordService {
+class MockPasswordService extends _i1.Mock implements _i5.PasswordService {
   @override
   String hashPassword(String? plainPassword) => (super.noSuchMethod(
         Invocation.method(
           #hashPassword,
           [plainPassword],
         ),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i6.dummyValue<String>(
           this,
           Invocation.method(
             #hashPassword,
             [plainPassword],
           ),
         ),
-        returnValueForMissingStub: _i8.dummyValue<String>(
+        returnValueForMissingStub: _i6.dummyValue<String>(
           this,
           Invocation.method(
             #hashPassword,
@@ -217,32 +187,74 @@ class MockPasswordService extends _i1.Mock implements _i7.PasswordService {
       ) as bool);
 
   @override
-  _i6.Future<void> setPassword(String? plainPassword) => (super.noSuchMethod(
+  _i4.Future<void> setPassword(String? plainPassword) => (super.noSuchMethod(
         Invocation.method(
           #setPassword,
           [plainPassword],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i6.Future<_i2.AdminSettings?> getAdminSettings() => (super.noSuchMethod(
+  _i4.Future<void> saveAdminConfig({
+    required String? password,
+    String? adminName,
+    String? adminContact,
+    String? recoveryChallenge,
+    String? recoveryAnswer,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #saveAdminConfig,
+          [],
+          {
+            #password: password,
+            #adminName: adminName,
+            #adminContact: adminContact,
+            #recoveryChallenge: recoveryChallenge,
+            #recoveryAnswer: recoveryAnswer,
+          },
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> updateAdminProfile({
+    String? adminName,
+    String? adminContact,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateAdminProfile,
+          [],
+          {
+            #adminName: adminName,
+            #adminContact: adminContact,
+          },
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<_i2.AdminSettings?> getAdminSettings() => (super.noSuchMethod(
         Invocation.method(
           #getAdminSettings,
           [],
         ),
-        returnValue: _i6.Future<_i2.AdminSettings?>.value(),
-        returnValueForMissingStub: _i6.Future<_i2.AdminSettings?>.value(),
-      ) as _i6.Future<_i2.AdminSettings?>);
+        returnValue: _i4.Future<_i2.AdminSettings?>.value(),
+        returnValueForMissingStub: _i4.Future<_i2.AdminSettings?>.value(),
+      ) as _i4.Future<_i2.AdminSettings?>);
 
   @override
-  _i6.Future<_i2.AdminSettings> recordFailedAttempt() => (super.noSuchMethod(
+  _i4.Future<_i2.AdminSettings> recordFailedAttempt() => (super.noSuchMethod(
         Invocation.method(
           #recordFailedAttempt,
           [],
         ),
-        returnValue: _i6.Future<_i2.AdminSettings>.value(_FakeAdminSettings_0(
+        returnValue: _i4.Future<_i2.AdminSettings>.value(_FakeAdminSettings_0(
           this,
           Invocation.method(
             #recordFailedAttempt,
@@ -250,345 +262,64 @@ class MockPasswordService extends _i1.Mock implements _i7.PasswordService {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i2.AdminSettings>.value(_FakeAdminSettings_0(
+            _i4.Future<_i2.AdminSettings>.value(_FakeAdminSettings_0(
           this,
           Invocation.method(
             #recordFailedAttempt,
             [],
           ),
         )),
-      ) as _i6.Future<_i2.AdminSettings>);
+      ) as _i4.Future<_i2.AdminSettings>);
 
   @override
-  _i6.Future<void> resetFailedAttempts() => (super.noSuchMethod(
+  _i4.Future<void> resetFailedAttempts() => (super.noSuchMethod(
         Invocation.method(
           #resetFailedAttempts,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i6.Future<bool> isLockedOut() => (super.noSuchMethod(
+  _i4.Future<bool> isLockedOut() => (super.noSuchMethod(
         Invocation.method(
           #isLockedOut,
           [],
         ),
-        returnValue: _i6.Future<bool>.value(false),
-        returnValueForMissingStub: _i6.Future<bool>.value(false),
-      ) as _i6.Future<bool>);
+        returnValue: _i4.Future<bool>.value(false),
+        returnValueForMissingStub: _i4.Future<bool>.value(false),
+      ) as _i4.Future<bool>);
 
   @override
-  _i6.Future<Duration> getRemainingLockoutDuration() => (super.noSuchMethod(
+  _i4.Future<Duration> getRemainingLockoutDuration() => (super.noSuchMethod(
         Invocation.method(
           #getRemainingLockoutDuration,
           [],
         ),
-        returnValue: _i6.Future<Duration>.value(_FakeDuration_1(
+        returnValue: _i4.Future<Duration>.value(_FakeDuration_1(
           this,
           Invocation.method(
             #getRemainingLockoutDuration,
             [],
           ),
         )),
-        returnValueForMissingStub: _i6.Future<Duration>.value(_FakeDuration_1(
+        returnValueForMissingStub: _i4.Future<Duration>.value(_FakeDuration_1(
           this,
           Invocation.method(
             #getRemainingLockoutDuration,
             [],
           ),
         )),
-      ) as _i6.Future<Duration>);
+      ) as _i4.Future<Duration>);
 
   @override
-  _i6.Future<void> resetPassword() => (super.noSuchMethod(
+  _i4.Future<void> resetPassword() => (super.noSuchMethod(
         Invocation.method(
           #resetPassword,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
-}
-
-/// A class which mocks [ScheduleService].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockScheduleService extends _i1.Mock implements _i9.ScheduleService {
-  @override
-  _i6.Future<List<_i3.Routine>> getRoutines() => (super.noSuchMethod(
-        Invocation.method(
-          #getRoutines,
-          [],
-        ),
-        returnValue: _i6.Future<List<_i3.Routine>>.value(<_i3.Routine>[]),
-        returnValueForMissingStub:
-            _i6.Future<List<_i3.Routine>>.value(<_i3.Routine>[]),
-      ) as _i6.Future<List<_i3.Routine>>);
-
-  @override
-  _i6.Future<_i3.Routine?> getRoutine(String? id) => (super.noSuchMethod(
-        Invocation.method(
-          #getRoutine,
-          [id],
-        ),
-        returnValue: _i6.Future<_i3.Routine?>.value(),
-        returnValueForMissingStub: _i6.Future<_i3.Routine?>.value(),
-      ) as _i6.Future<_i3.Routine?>);
-
-  @override
-  _i6.Future<_i3.Routine> addRoutine({
-    required List<int>? weekdays,
-    required DateTime? startTime,
-    required DateTime? endTime,
-    required String? label,
-    bool? enabled = true,
-    List<_i10.TimeSlot>? slots,
-  }) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #addRoutine,
-          [],
-          {
-            #weekdays: weekdays,
-            #startTime: startTime,
-            #endTime: endTime,
-            #label: label,
-            #enabled: enabled,
-            #slots: slots,
-          },
-        ),
-        returnValue: _i6.Future<_i3.Routine>.value(_FakeRoutine_2(
-          this,
-          Invocation.method(
-            #addRoutine,
-            [],
-            {
-              #weekdays: weekdays,
-              #startTime: startTime,
-              #endTime: endTime,
-              #label: label,
-              #enabled: enabled,
-              #slots: slots,
-            },
-          ),
-        )),
-        returnValueForMissingStub: _i6.Future<_i3.Routine>.value(_FakeRoutine_2(
-          this,
-          Invocation.method(
-            #addRoutine,
-            [],
-            {
-              #weekdays: weekdays,
-              #startTime: startTime,
-              #endTime: endTime,
-              #label: label,
-              #enabled: enabled,
-              #slots: slots,
-            },
-          ),
-        )),
-      ) as _i6.Future<_i3.Routine>);
-
-  @override
-  _i6.Future<_i3.Routine> updateRoutine(_i3.Routine? routine) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #updateRoutine,
-          [routine],
-        ),
-        returnValue: _i6.Future<_i3.Routine>.value(_FakeRoutine_2(
-          this,
-          Invocation.method(
-            #updateRoutine,
-            [routine],
-          ),
-        )),
-        returnValueForMissingStub: _i6.Future<_i3.Routine>.value(_FakeRoutine_2(
-          this,
-          Invocation.method(
-            #updateRoutine,
-            [routine],
-          ),
-        )),
-      ) as _i6.Future<_i3.Routine>);
-
-  @override
-  _i6.Future<void> deleteRoutine(String? id) => (super.noSuchMethod(
-        Invocation.method(
-          #deleteRoutine,
-          [id],
-        ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
-
-  @override
-  _i6.Future<void> toggleRoutine(
-    String? id,
-    bool? enabled,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #toggleRoutine,
-          [
-            id,
-            enabled,
-          ],
-        ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
-
-  @override
-  _i6.Future<bool> hasOverlappingRoutines(_i3.Routine? routine) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #hasOverlappingRoutines,
-          [routine],
-        ),
-        returnValue: _i6.Future<bool>.value(false),
-        returnValueForMissingStub: _i6.Future<bool>.value(false),
-      ) as _i6.Future<bool>);
-
-  @override
-  _i6.Future<void> scheduleAllRoutines(List<_i3.Routine>? routines) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #scheduleAllRoutines,
-          [routines],
-        ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
-
-  @override
-  _i6.Future<void> cancelRoutine(String? routineId) => (super.noSuchMethod(
-        Invocation.method(
-          #cancelRoutine,
-          [routineId],
-        ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
-
-  @override
-  _i6.Future<void> cancelAllRoutines() => (super.noSuchMethod(
-        Invocation.method(
-          #cancelAllRoutines,
-          [],
-        ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
-
-  @override
-  _i6.Future<bool> isAnyRoutineActive() => (super.noSuchMethod(
-        Invocation.method(
-          #isAnyRoutineActive,
-          [],
-        ),
-        returnValue: _i6.Future<bool>.value(false),
-        returnValueForMissingStub: _i6.Future<bool>.value(false),
-      ) as _i6.Future<bool>);
-
-  @override
-  _i6.Future<_i3.Routine?> getNextRoutine() => (super.noSuchMethod(
-        Invocation.method(
-          #getNextRoutine,
-          [],
-        ),
-        returnValue: _i6.Future<_i3.Routine?>.value(),
-        returnValueForMissingStub: _i6.Future<_i3.Routine?>.value(),
-      ) as _i6.Future<_i3.Routine?>);
-}
-
-/// A class which mocks [FocusSessionManager].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockFocusSessionManager extends _i1.Mock
-    implements _i11.FocusSessionManager {
-  @override
-  _i6.Future<_i4.FocusSessionSnapshot?> getActiveSnapshot() =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getActiveSnapshot,
-          [],
-        ),
-        returnValue: _i6.Future<_i4.FocusSessionSnapshot?>.value(),
-        returnValueForMissingStub:
-            _i6.Future<_i4.FocusSessionSnapshot?>.value(),
-      ) as _i6.Future<_i4.FocusSessionSnapshot?>);
-
-  @override
-  _i6.Future<_i4.FocusSessionSnapshot> startSession({
-    required Duration? duration,
-    String? scheduleId,
-  }) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #startSession,
-          [],
-          {
-            #duration: duration,
-            #scheduleId: scheduleId,
-          },
-        ),
-        returnValue: _i6.Future<_i4.FocusSessionSnapshot>.value(
-            _FakeFocusSessionSnapshot_3(
-          this,
-          Invocation.method(
-            #startSession,
-            [],
-            {
-              #duration: duration,
-              #scheduleId: scheduleId,
-            },
-          ),
-        )),
-        returnValueForMissingStub: _i6.Future<_i4.FocusSessionSnapshot>.value(
-            _FakeFocusSessionSnapshot_3(
-          this,
-          Invocation.method(
-            #startSession,
-            [],
-            {
-              #duration: duration,
-              #scheduleId: scheduleId,
-            },
-          ),
-        )),
-      ) as _i6.Future<_i4.FocusSessionSnapshot>);
-
-  @override
-  _i6.Future<void> endSession() => (super.noSuchMethod(
-        Invocation.method(
-          #endSession,
-          [],
-        ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
-
-  @override
-  _i6.Future<void> updateActiveSnapshot(_i4.FocusSessionSnapshot? snapshot) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #updateActiveSnapshot,
-          [snapshot],
-        ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
-
-  @override
-  _i6.Future<void> restoreSessionState() => (super.noSuchMethod(
-        Invocation.method(
-          #restoreSessionState,
-          [],
-        ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 }

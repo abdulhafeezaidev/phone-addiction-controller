@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 part 'emergency_override_state.g.dart';
 
 @HiveType(typeId: AppConstants.emergencyOverrideTypeId)
+// ignore: must_be_immutable
 class EmergencyOverrideState extends HiveObject with EquatableMixin {
   @HiveField(0)
   final bool isInReflection;

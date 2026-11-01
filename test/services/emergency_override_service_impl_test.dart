@@ -4,67 +4,72 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:phone_addiction_controller/core/constants/app_constants.dart';
-import 'package:phone_addiction_controller/domain/models/admin_settings.dart';
 import 'package:phone_addiction_controller/domain/models/emergency_override_state.dart';
 import 'package:phone_addiction_controller/services/impl/emergency_override_service_impl.dart';
 import 'package:phone_addiction_controller/services/interfaces/storage_service.dart';
 import 'package:phone_addiction_controller/services/interfaces/password_service.dart';
-import 'package:phone_addiction_controller/services/interfaces/schedule_service.dart';
-import 'package:phone_addiction_controller/services/interfaces/focus_session_manager.dart';
+import 'package:phone_addiction_controller/services/native_bridge_service.dart';
 
 import 'emergency_override_service_impl_test.mocks.dart';
+
+class FakeNativeBridgeService extends Fake implements NativeBridgeService {
+  @override
+  Future<void> setEmergencyOverrideActive({
+    required bool active,
+    required int expirationTimeMs,
+  }) async {}
+}
 
 @GenerateNiceMocks([
   MockSpec<StorageService>(),
   MockSpec<PasswordService>(),
-  MockSpec<ScheduleService>(),
-  MockSpec<FocusSessionManager>(),
 ])
 void main() {
   late MockStorageService mockStorageService;
   late MockPasswordService mockPasswordService;
-  late MockScheduleService mockScheduleService;
-  late MockFocusSessionManager mockFocusSessionManager;
+  late FakeNativeBridgeService fakeNativeBridgeService;
   late EmergencyOverrideServiceImpl overrideService;
 
   setUp(() {
     mockStorageService = MockStorageService();
     mockPasswordService = MockPasswordService();
-    mockScheduleService = MockScheduleService();
-    mockFocusSessionManager = MockFocusSessionManager();
+    fakeNativeBridgeService = FakeNativeBridgeService();
 
     overrideService = EmergencyOverrideServiceImpl(
       storageService: mockStorageService,
       passwordService: mockPasswordService,
-      scheduleService: mockScheduleService,
-      focusSessionManager: mockFocusSessionManager,
+      nativeBridgeService: fakeNativeBridgeService,
     );
   });
 
-  group('EmergencyOverrideServiceImpl Tests', () {
-    test('setRecoveryChallenge hashes answer and updates AdminSettings', () async {
-      final mockSettings = AdminSettings(passwordHash: 'hashedPass');
-      when(mockPasswordService.getAdminSettings()).thenAnswer((_) async => mockSettings);
+  tearDown(() {
+    overrideService.dispose();
+  });
 
+  group('EmergencyOverrideServiceImpl Tests', () {
+    test('setRecoveryChallenge hashes answer and updates emergencyOverrideBox', () async {
       await overrideService.setRecoveryChallenge('Pet name?', 'Buddy');
 
       final expectedHash = sha256.convert(utf8.encode('buddy')).toString();
-      verify(mockStorageService.put(
-        AppConstants.adminSettingsBox,
-        AppConstants.adminPasswordKey,
-        argThat(predicate<AdminSettings>((settings) => settings.recoveryAnswerHash == expectedHash)),
+      verify(mockStorageService.put<String>(
+        AppConstants.settingsBox,
+        'emergency_challenge',
+        'Pet name?',
+      )).called(1);
+      verify(mockStorageService.put<String>(
+        AppConstants.settingsBox,
+        'emergency_answer_hash',
+        expectedHash,
       )).called(1);
     });
 
     test('verifyRecoveryAnswer initiates reflection timer on match', () async {
       final hashedAnswer = sha256.convert(utf8.encode('buddy')).toString();
-      final mockSettings = AdminSettings(
-        passwordHash: 'hashedPass',
-        recoveryChallenge: 'Pet name?',
-        recoveryAnswerHash: hashedAnswer,
-      );
 
-      when(mockPasswordService.getAdminSettings()).thenAnswer((_) async => mockSettings);
+      when(mockStorageService.get<dynamic>(
+        AppConstants.settingsBox,
+        'emergency_answer_hash',
+      )).thenReturn(hashedAnswer);
       when(mockStorageService.get<EmergencyOverrideState>(
         AppConstants.emergencyOverrideBox,
         'state',
@@ -82,13 +87,11 @@ void main() {
 
     test('verifyRecoveryAnswer fails on wrong answer', () async {
       final hashedAnswer = sha256.convert(utf8.encode('buddy')).toString();
-      final mockSettings = AdminSettings(
-        passwordHash: 'hashedPass',
-        recoveryChallenge: 'Pet name?',
-        recoveryAnswerHash: hashedAnswer,
-      );
 
-      when(mockPasswordService.getAdminSettings()).thenAnswer((_) async => mockSettings);
+      when(mockStorageService.get<dynamic>(
+        AppConstants.settingsBox,
+        'emergency_answer_hash',
+      )).thenReturn(hashedAnswer);
 
       final verified = await overrideService.verifyRecoveryAnswer('Max');
 
@@ -97,17 +100,15 @@ void main() {
 
     test('verifyRecoveryAnswer respects cooldown window', () async {
       final hashedAnswer = sha256.convert(utf8.encode('buddy')).toString();
-      final mockSettings = AdminSettings(
-        passwordHash: 'hashedPass',
-        recoveryChallenge: 'Pet name?',
-        recoveryAnswerHash: hashedAnswer,
-      );
 
       final stateWithRecentActivation = EmergencyOverrideState(
         lastActivationTime: DateTime.now().subtract(const Duration(hours: 1)),
       );
 
-      when(mockPasswordService.getAdminSettings()).thenAnswer((_) async => mockSettings);
+      when(mockStorageService.get<dynamic>(
+        AppConstants.settingsBox,
+        'emergency_answer_hash',
+      )).thenReturn(hashedAnswer);
       when(mockStorageService.get<EmergencyOverrideState>(
         AppConstants.emergencyOverrideBox,
         'state',
@@ -116,6 +117,34 @@ void main() {
       final verified = await overrideService.verifyRecoveryAnswer('buddy');
 
       expect(verified, isFalse);
+    });
+
+    test('verifyRecoveryAnswer rejects default fallback phrase when custom hash is configured', () async {
+      final hashedAnswer = sha256.convert(utf8.encode('buddy')).toString();
+
+      when(mockStorageService.get<dynamic>(
+        AppConstants.settingsBox,
+        'emergency_answer_hash',
+      )).thenReturn(hashedAnswer);
+
+      final verified = await overrideService.verifyRecoveryAnswer('I need emergency access');
+
+      expect(verified, isFalse);
+    });
+
+    test('verifyRecoveryAnswer accepts default fallback phrase when no custom hash is configured', () async {
+      when(mockStorageService.get<dynamic>(
+        AppConstants.settingsBox,
+        'emergency_answer_hash',
+      )).thenReturn(null);
+      when(mockStorageService.get<EmergencyOverrideState>(
+        AppConstants.emergencyOverrideBox,
+        'state',
+      )).thenReturn(EmergencyOverrideState());
+
+      final verified = await overrideService.verifyRecoveryAnswer('I need emergency access');
+
+      expect(verified, isTrue);
     });
   });
 }

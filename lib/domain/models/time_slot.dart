@@ -7,6 +7,7 @@ part 'time_slot.g.dart';
 
 /// Represents a time window within a routine (e.g. 11:00 PM to 09:00 AM).
 @HiveType(typeId: AppConstants.timeSlotTypeId)
+// ignore: must_be_immutable
 class TimeSlot extends HiveObject with EquatableMixin {
   /// Start hour (0 - 23)
   @HiveField(0)

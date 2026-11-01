@@ -1,0 +1,6 @@
+{
+  "name": "Bloomly Design Studio - Mindful Phone Detox Mascot & UX Framework",
+  "description": "Visual and behavioral design framework for a supportive phone addiction controller app with an interactive cute mascot guide, color tokens, and supportive UX patterns.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

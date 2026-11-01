@@ -2,9 +2,9 @@ import '../../domain/models/admin_settings.dart';
 
 /// Abstract interface for the Password Service.
 ///
-/// Handles admin password hashing, verification, and lockout logic.
+/// Handles admin password hashing, verification, accountability partner info, and lockout logic.
 abstract class PasswordService {
-  /// Hashes [plainPassword] using SHA-256 and returns the hash string.
+  /// Hashes [plainPassword] using salted PBKDF2-like HMAC-SHA256.
   String hashPassword(String plainPassword);
 
   /// Returns true if [plainPassword] matches the stored [storedHash].
@@ -12,6 +12,21 @@ abstract class PasswordService {
 
   /// Sets a new admin password. Hashes it before storing.
   Future<void> setPassword(String plainPassword);
+
+  /// Saves the complete admin configuration including accountability partner and recovery questions.
+  Future<void> saveAdminConfig({
+    required String password,
+    String? adminName,
+    String? adminContact,
+    String? recoveryChallenge,
+    String? recoveryAnswer,
+  });
+
+  /// Updates admin name and contact info.
+  Future<void> updateAdminProfile({
+    String? adminName,
+    String? adminContact,
+  });
 
   /// Returns the current [AdminSettings], or null if never configured.
   Future<AdminSettings?> getAdminSettings();
@@ -22,13 +37,12 @@ abstract class PasswordService {
   /// Resets the failed attempt counter after a successful login.
   Future<void> resetFailedAttempts();
 
-  /// Returns true if the account is currently locked out due to too many
-  /// failed attempts.
+  /// Returns true if the account is currently locked out due to too many failed attempts.
   Future<bool> isLockedOut();
 
   /// Returns the remaining lockout duration, or Duration.zero if not locked.
   Future<Duration> getRemainingLockoutDuration();
-  /// **New**: Clears the stored admin password, allowing the user to set a new one.
-  Future<void> resetPassword();
 
+  /// Clears the stored admin settings.
+  Future<void> resetPassword();
 }

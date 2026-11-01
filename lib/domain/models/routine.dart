@@ -7,6 +7,7 @@ part 'routine.g.dart';
 
 /// Represents a scheduled Focus Mode routine with support for multiple custom daily time slots.
 @HiveType(typeId: AppConstants.routineTypeId)
+// ignore: must_be_immutable
 class Routine extends HiveObject with EquatableMixin {
   /// Selected weekdays (0 = Monday, 6 = Sunday).
   @HiveField(0)

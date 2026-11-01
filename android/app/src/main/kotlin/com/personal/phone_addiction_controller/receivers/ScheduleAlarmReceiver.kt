@@ -6,10 +6,8 @@ import android.content.Intent
 import android.util.Log
 import com.personal.phone_addiction_controller.DiagnosticsLogger
 import com.personal.phone_addiction_controller.FocusModeManager
-import com.personal.phone_addiction_controller.MainActivity
 import com.personal.phone_addiction_controller.ScheduleManager
-import com.personal.phone_addiction_controller.FocusEnvironmentManager
-import com.personal.phone_addiction_controller.services.FocusForegroundService
+import com.personal.phone_addiction_controller.FocusSessionController
 
 /**
  * Receives alarms from [ScheduleManager] to start or stop Focus Mode.
@@ -17,9 +15,7 @@ import com.personal.phone_addiction_controller.services.FocusForegroundService
  * On START:
  *   1. Initialises FocusModeManager with native state
  *   2. Starts the persistent FocusForegroundService (notification)
- *   3. Launches MainActivity with [EXTRA_ROUTINE_TRIGGERED] so the Flutter
- *      layer can create the FocusSessionSnapshot and navigate to Focus Home
- *   4. Re-schedules the next occurrence of this alarm
+ *   3. Re-schedules the next occurrence of this alarm
  *
  * On STOP:
  *   1. Ends the native focus session
@@ -59,26 +55,40 @@ class ScheduleAlarmReceiver : BroadcastReceiver() {
         DiagnosticsLogger.routineStarted(routineId)
 
         if (FocusModeManager.isActive) {
-            Log.d(TAG, "Focus mode already active — skipping duplicate start for $routineId")
-            DiagnosticsLogger.routineInterrupted(routineId, "Skipped: Focus already active")
-            return
+            Log.d(TAG, "Focus mode already active — updating activeRoutineId for $routineId")
+            FocusModeManager.activeRoutineId = routineId
+            FocusModeManager.isScheduled = true
+        } else {
+            // 1. Set native focus state (persisted immediately to SharedPreferences)
+            FocusModeManager.startSession(scheduled = true, routineId = routineId)
+            DiagnosticsLogger.sessionStarted(scheduled = true, routineId = routineId)
         }
 
-        // 1. Set native focus state (persisted immediately to SharedPreferences)
-        FocusModeManager.startSession(scheduled = true, routineId = routineId)
-        DiagnosticsLogger.sessionStarted(scheduled = true, routineId = routineId)
+        // 2. Load blocked apps for this routine if specified in routine JSON
+        try {
+            val scheduleManager = ScheduleManager(context)
+            val routineJson = scheduleManager.getAllRoutines()[routineId]
+            if (routineJson != null) {
+                val obj = org.json.JSONObject(routineJson)
+                if (obj.has("blockedPackages")) {
+                    val arr = obj.getJSONArray("blockedPackages")
+                    val pkgs = mutableSetOf<String>()
+                    for (i in 0 until arr.length()) pkgs.add(arr.getString(i))
+                    if (pkgs.isNotEmpty()) {
+                        FocusModeManager.blockedPackages = pkgs
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading blocked packages for routine $routineId", e)
+        }
 
-        // 2. Start the persistent foreground notification and apply native Focus policies immediately
-        FocusEnvironmentManager(context).enterFocusEnvironment()
+        // 3. Start the persistent foreground notification and apply native Focus policies immediately
+        FocusSessionController.ensureServiceRunning(context)
         DiagnosticsLogger.routineForegroundServiceStarted(routineId)
 
-        // 3. Launch MainActivity (and thereby the Flutter engine) with a signal
-        //    telling the Flutter layer to: create the FocusSessionSnapshot,
-        //    update allowed apps, and navigate to the Focus Home screen.
-        launchMainActivityForRoutine(context, routineId)
-        DiagnosticsLogger.routineSnapshotCreated(routineId)
-
-        Log.d(TAG, "Focus session started by routine: $routineId")
+        // In Personal Mode, do NOT launch MainActivity. Focus runs seamlessly in background.
+        Log.d(TAG, "Focus session started in background by routine: $routineId")
     }
 
     private fun handleStop(context: Context, routineId: String) {
@@ -89,39 +99,29 @@ class ScheduleAlarmReceiver : BroadcastReceiver() {
             return
         }
 
-        // Only stop if no other routine is still running
+        // Precedence Check:
+        // 1. Check if a manual session is currently running
+        val now = System.currentTimeMillis()
+        val manualActive = !FocusModeManager.isScheduled &&
+            FocusModeManager.scheduledEndTime > 0L &&
+            now < FocusModeManager.scheduledEndTime
+
+        // 2. Check if any scheduled routine is still running
         val scheduleManager = ScheduleManager(context)
-        if (scheduleManager.isAnyRoutineActive()) {
-            Log.d(TAG, "Another routine slot is still active — not stopping")
-            DiagnosticsLogger.routineInterrupted(routineId, "Stop deferred: another routine still active")
+        val routineActive = scheduleManager.isAnyRoutineActive()
+
+        if (manualActive || routineActive) {
+            Log.d(TAG, "Precedence check: manual session ($manualActive) or routine ($routineActive) still active — not stopping focus mode")
+            DiagnosticsLogger.routineInterrupted(routineId, "Stop deferred: session or other routine still active")
             return
         }
 
-        FocusModeManager.endSession()
-        FocusEnvironmentManager(context).exitFocusEnvironment()
+        FocusSessionController.endSession(context)
         DiagnosticsLogger.sessionEnded()
         Log.d(TAG, "Focus session ended by routine: $routineId")
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
-
-    private fun launchMainActivityForRoutine(context: Context, routineId: String) {
-        try {
-            val intent = Intent(context, MainActivity::class.java).apply {
-                addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                )
-                putExtra(EXTRA_ROUTINE_TRIGGERED, true)
-                putExtra(EXTRA_TRIGGERED_ROUTINE_ID, routineId)
-            }
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to launch MainActivity for routine $routineId", e)
-            DiagnosticsLogger.routineInterrupted(routineId, "Failed to launch MainActivity: ${e.message}")
-        }
-    }
 
     private fun rescheduleNext(context: Context, routineId: String) {
         try {
@@ -141,10 +141,5 @@ class ScheduleAlarmReceiver : BroadcastReceiver() {
 
     companion object {
         private const val TAG = "ScheduleAlarmReceiver"
-
-        /** Intent extra: signals Flutter that a routine triggered automatically. */
-        const val EXTRA_ROUTINE_TRIGGERED    = "routine_triggered"
-        /** Intent extra: the routine ID that triggered. */
-        const val EXTRA_TRIGGERED_ROUTINE_ID = "triggered_routine_id"
     }
 }

@@ -4,10 +4,11 @@ import '../../../core/constants/app_constants.dart';
 
 part 'admin_settings.g.dart';
 
-/// Stores administrator password and security settings.
+/// Stores administrator password, accountability partner info, and security settings.
 @HiveType(typeId: AppConstants.adminSettingsTypeId)
+// ignore: must_be_immutable
 class AdminSettings extends HiveObject with EquatableMixin {
-  /// SHA-256 hash of the administrator password.
+  /// Salted PBKDF2-like hash of the administrator password.
   @HiveField(0)
   String passwordHash;
 
@@ -35,6 +36,14 @@ class AdminSettings extends HiveObject with EquatableMixin {
   @HiveField(6)
   String? recoveryAnswerHash;
 
+  /// Name of the chosen administrator / accountability partner.
+  @HiveField(7)
+  String? adminName;
+
+  /// Contact (phone number or email) of the administrator.
+  @HiveField(8)
+  String? adminContact;
+
   AdminSettings({
     required this.passwordHash,
     this.isLockEnabled = true,
@@ -43,6 +52,8 @@ class AdminSettings extends HiveObject with EquatableMixin {
     this.failedAttemptCount = 0,
     this.recoveryChallenge,
     this.recoveryAnswerHash,
+    this.adminName,
+    this.adminContact,
   });
 
   AdminSettings copyWith({
@@ -53,6 +64,8 @@ class AdminSettings extends HiveObject with EquatableMixin {
     int? failedAttemptCount,
     String? recoveryChallenge,
     String? recoveryAnswerHash,
+    String? adminName,
+    String? adminContact,
   }) {
     return AdminSettings(
       passwordHash: passwordHash ?? this.passwordHash,
@@ -62,6 +75,8 @@ class AdminSettings extends HiveObject with EquatableMixin {
       failedAttemptCount: failedAttemptCount ?? this.failedAttemptCount,
       recoveryChallenge: recoveryChallenge ?? this.recoveryChallenge,
       recoveryAnswerHash: recoveryAnswerHash ?? this.recoveryAnswerHash,
+      adminName: adminName ?? this.adminName,
+      adminContact: adminContact ?? this.adminContact,
     );
   }
 
@@ -74,5 +89,7 @@ class AdminSettings extends HiveObject with EquatableMixin {
         failedAttemptCount,
         recoveryChallenge,
         recoveryAnswerHash,
+        adminName,
+        adminContact,
       ];
 }

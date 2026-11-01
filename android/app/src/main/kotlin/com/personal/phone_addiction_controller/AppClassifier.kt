@@ -94,7 +94,7 @@ class AppClassifier(private val context: Context) {
         if (packageName.isBlank()) return false
         if (launcherPackages.contains(packageName)) return true
         val lower = packageName.lowercase(Locale.ROOT)
-        return commonLaunchers.contains(lower) ||
+        return FocusPolicyEngine.KNOWN_LAUNCHERS.contains(lower) ||
             lower.endsWith(".launcher") ||
             lower.contains("launcher") ||
             lower.endsWith(".home")
@@ -118,24 +118,5 @@ class AppClassifier(private val context: Context) {
         } catch (_: PackageManager.NameNotFoundException) {
             null
         }
-    }
-
-    companion object {
-        private val commonLaunchers = setOf(
-            "com.sec.android.app.launcher",
-            "com.samsung.android.app.homup",
-            "com.google.android.apps.nexuslauncher",
-            "com.miui.home",
-            "com.oppo.launcher",
-            "com.coloros.launcher",
-            "com.huawei.android.launcher",
-            "com.vivo.launcher",
-            "com.oneplus.launcher",
-            "com.android.launcher",
-            "com.android.launcher3",
-            "com.microsoft.launcher",
-            "com.nova.launcher",
-            "com.teslacoilsw.launcher"
-        )
     }
 }

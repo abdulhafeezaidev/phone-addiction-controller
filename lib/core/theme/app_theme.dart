@@ -1,27 +1,8 @@
 import 'package:flutter/material.dart';
+import 'focus_tokens.dart';
 
 class AppTheme {
   AppTheme._();
-
-  // ── Font Family ───────────────────────────────────────────────────────────
-  // Using Inter as the preferred font. On devices without Inter installed,
-  // Flutter falls back to the default sans-serif font.
-  static const String _fontFamily = 'Inter';
-
-  // ── Seed Colors ──────────────────────────────────────────────────────────
-  static const Color _primarySeed = Color(0xFF5E6AD2); // Indigo
-  static const Color _errorColor = Color(0xFFCF6679);
-
-  // ── Dark Palette ─────────────────────────────────────────────────────────
-  static const Color _darkBackground = Color(0xFF121414); // Deep Charcoal
-  static const Color _darkSurface = Color(0xFF212123); // Squircular cards background
-  static const Color _darkSurfaceVariant = Color(0xFF1A1C1C); // Subtle secondary background
-  static const Color _darkOnSurface = Color(0xFFE3E2E2);
-  static const Color _darkOnSurfaceVariant = Color(0xFFC6C5D5);
-
-  // ── Light Palette ────────────────────────────────────────────────────────
-  static const Color _lightBackground = Color(0xFFF5F5FF);
-  static const Color _lightSurface = Color(0xFFFFFFFF);
 
   static ThemeData get darkTheme => _buildTheme(Brightness.dark);
   static ThemeData get lightTheme => _buildTheme(Brightness.light);
@@ -29,75 +10,32 @@ class AppTheme {
   static ThemeData _buildTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
 
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: _primarySeed,
+    final colorScheme = ColorScheme(
       brightness: brightness,
-      surface: isDark ? _darkSurface : _lightSurface,
-      surfaceContainerHighest: isDark ? _darkSurfaceVariant : const Color(0xFFEEEEFF),
-      error: _errorColor,
-      onSurface: isDark ? _darkOnSurface : const Color(0xFF1A1A2E),
-      onSurfaceVariant: isDark ? _darkOnSurfaceVariant : const Color(0xFF5A5A7A),
+      primary: FocusTokens.sagePrimary,
+      onPrimary: Colors.white,
+      secondary: FocusTokens.indigoPrimary,
+      onSecondary: Colors.white,
+      error: FocusTokens.terracottaPrimary,
+      onError: Colors.white,
+      surface: isDark ? FocusTokens.surfaceDefault : const Color(0xFFFFFFFF),
+      onSurface: isDark ? FocusTokens.textPrimary : const Color(0xFF111827),
+      surfaceContainerHighest: isDark ? FocusTokens.surfaceSunken : const Color(0xFFF0F2F5),
+      onSurfaceVariant: isDark ? FocusTokens.textSecondary : const Color(0xFF4B5563),
+      outline: isDark ? FocusTokens.borderStrong : const Color(0x1F000000),
+      outlineVariant: isDark ? FocusTokens.borderSubtle : const Color(0x0F000000),
     );
 
-    final textTheme = TextTheme(
-      displayLarge: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 57,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.25,
-      ),
-      headlineLarge: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 32,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.5,
-      ),
-      headlineMedium: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 24,
-        fontWeight: FontWeight.w600,
-      ),
-      titleLarge: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-      ),
-      titleMedium: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-        letterSpacing: 0.15,
-      ),
-      titleSmall: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-      ),
-      bodyLarge: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-      ),
-      bodyMedium: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-      ),
-      bodySmall: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-      ),
-      labelLarge: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-      ),
-      labelSmall: const TextStyle(
-        fontFamily: _fontFamily,
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
-      ),
+    const textTheme = TextTheme(
+      displayLarge: FocusTokens.displayTimer,
+      headlineLarge: FocusTokens.headlineHero,
+      headlineMedium: FocusTokens.headlineSection,
+      titleLarge: FocusTokens.titleCard,
+      titleMedium: FocusTokens.titleMedium,
+      bodyLarge: FocusTokens.bodyLarge,
+      bodyMedium: FocusTokens.bodyMedium,
+      labelLarge: FocusTokens.buttonLabel,
+      labelSmall: FocusTokens.labelBadge,
     );
 
     return ThemeData(
@@ -105,8 +43,9 @@ class AppTheme {
       colorScheme: colorScheme,
       textTheme: textTheme,
       brightness: brightness,
-      scaffoldBackgroundColor: isDark ? _darkBackground : _lightBackground,
-      fontFamily: _fontFamily,
+      scaffoldBackgroundColor: isDark ? FocusTokens.canvasBase : const Color(0xFFF7F8FA),
+      fontFamily: FocusTokens.fontFamily,
+
       // AppBar
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -118,126 +57,120 @@ class AppTheme {
         ),
         iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
+
       // Card
       cardTheme: CardThemeData(
         elevation: 0,
-        color: isDark ? _darkSurface : const Color(0xFFEEEEFF),
+        color: isDark ? FocusTokens.surfaceDefault : Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: FocusTokens.borderRadiusXl,
           side: BorderSide(
-            color: isDark ? const Color(0xFF2C2C2E) : colorScheme.outline.withValues(alpha: 0.15),
+            color: isDark ? FocusTokens.borderSubtle : const Color(0x0F000000),
             width: 1,
           ),
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: const EdgeInsets.symmetric(
+          horizontal: FocusTokens.screenGutter,
+          vertical: FocusTokens.spaceXs,
+        ),
       ),
+
       // NavigationBar
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: isDark ? _darkSurface : _lightSurface,
+        backgroundColor: isDark ? FocusTokens.surfaceElevated : Colors.white,
         elevation: 0,
-        indicatorColor: _primarySeed,
+        indicatorColor: FocusTokens.sagePrimary.withValues(alpha: 0.18),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return textTheme.labelLarge?.copyWith(
+            return FocusTokens.labelBadge.copyWith(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: _primarySeed,
+              color: FocusTokens.sagePrimary,
             );
           }
-          return textTheme.labelLarge?.copyWith(
+          return FocusTokens.labelBadge.copyWith(
             fontSize: 11,
-            color: isDark ? _darkOnSurfaceVariant : const Color(0xFF5A5A7A),
+            color: FocusTokens.textMuted,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: Colors.white, size: 24);
+            return const IconThemeData(color: FocusTokens.sagePrimary, size: 24);
           }
-          return IconThemeData(
-            color: isDark ? _darkOnSurfaceVariant : const Color(0xFF5A5A7A),
+          return const IconThemeData(
+            color: FocusTokens.textMuted,
             size: 24,
           );
         }),
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
       ),
+
       // Switch
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return Colors.white;
-          return null;
+          return FocusTokens.textMuted;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return _primarySeed;
-          return null;
+          if (states.contains(WidgetState.selected)) return FocusTokens.sagePrimary;
+          return FocusTokens.surfaceSunken;
         }),
+        trackOutlineColor: WidgetStateProperty.all(FocusTokens.borderSubtle),
       ),
-      // FloatingActionButton
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: _primarySeed,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
+
       // Input Decoration
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? _darkSurfaceVariant : const Color(0xFFEEEEFF),
+        fillColor: isDark ? FocusTokens.surfaceSunken : const Color(0xFFF0F2F5),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+          borderRadius: FocusTokens.borderRadiusMd,
+          borderSide: const BorderSide(color: FocusTokens.borderSubtle),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(
-            color: colorScheme.outline.withValues(alpha: 0.2),
-          ),
+          borderRadius: FocusTokens.borderRadiusMd,
+          borderSide: const BorderSide(color: FocusTokens.borderSubtle),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: _primarySeed, width: 2),
+          borderRadius: FocusTokens.borderRadiusMd,
+          borderSide: const BorderSide(color: FocusTokens.sagePrimary, width: 1.5),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: FocusTokens.spaceBase,
+          vertical: FocusTokens.spaceMd,
+        ),
       ),
-      // ElevatedButton
+
+      // Elevated & Filled Buttons
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _primarySeed,
+          backgroundColor: FocusTokens.sagePrimary,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+          padding: const EdgeInsets.symmetric(
+            horizontal: FocusTokens.spaceXl,
+            vertical: FocusTokens.spaceMd,
           ),
-          textStyle: textTheme.labelLarge,
+          shape: RoundedRectangleBorder(
+            borderRadius: FocusTokens.borderRadiusPill,
+          ),
+          textStyle: FocusTokens.buttonLabel,
         ),
       ),
-      // FilledButton
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: _primarySeed,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          textStyle: textTheme.labelLarge,
-        ),
-      ),
+
       // Divider
-      dividerTheme: DividerThemeData(
-        color: colorScheme.outline.withValues(alpha: 0.12),
+      dividerTheme: const DividerThemeData(
+        color: FocusTokens.borderSubtle,
         thickness: 1,
       ),
+
       // ListTile
       listTileTheme: ListTileThemeData(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: FocusTokens.spaceBase,
+          vertical: FocusTokens.space2xs,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: FocusTokens.borderRadiusLg),
       ),
     );
   }
@@ -245,9 +178,9 @@ class AppTheme {
 
 // ── App Color Extensions ────────────────────────────────────────────────────
 extension AppColors on ColorScheme {
-  Color get success => const Color(0xFF4CAF7D);
-  Color get warning => const Color(0xFFFFB74D);
-  Color get info => const Color(0xFF42A5F5);
-  Color get gradientStart => const Color(0xFF6C63FF);
-  Color get gradientEnd => const Color(0xFFAB47BC);
+  Color get success => FocusTokens.sagePrimary;
+  Color get warning => FocusTokens.amberPrimary;
+  Color get info => FocusTokens.indigoPrimary;
+  Color get gradientStart => FocusTokens.sagePrimary;
+  Color get gradientEnd => FocusTokens.indigoPrimary;
 }

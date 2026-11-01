@@ -9,24 +9,16 @@ import android.util.Log
 import java.util.Locale
 
 /**
- * FocusPolicyEngine — Single Source of Truth for All Enforcement Decisions.
+ * FocusPolicyEngine - single source of truth for enforcement decisions.
  *
- * Every foreground package transition during Focus Mode MUST go through here.
- * Nothing else in the codebase decides whether a package is allowed or blocked.
- *
- *  Decision pipeline:
- *  1. Is Focus Mode even active?               → ALLOW
- *  2. Is emergency override active?             → ALLOW
- *  3. Is this our own Focus Home package?       → ALLOW
- *  4. Is this a critical system infrastructure? → ALLOW  (telecom, IME, SystemUI)
- *  5. Is this a launcher (home screen)?         → BLOCK  (prevents Home bypass)
- *  6. Is this an assistant / voice app?         → BLOCK  (prevents voice bypass)
- *  7. Is this Settings or Package Installer?    → BLOCK  (prevents uninstall bypass)
- *  8. Is this the Recent Apps UI?               → BLOCK  (prevents task switching)
- *  9. Is this in the alwaysAllowedApps list?    → ALLOW
- * 10. Is this in the user's allowedApps list?   → ALLOW
- * 11. Is this a non-launchable system package?  → ALLOW  (SystemUI, framework, etc.)
- * 12. Everything else                           → BLOCK
+ * Every foreground package transition goes through [evaluate]. Pipeline:
+ *  1. Is a session running (and not past its end time)?  -> else ALLOW
+ *  2. Is the emergency override active?                  -> ALLOW
+ *  3. Is this our own app?                               -> ALLOW
+ *  4. Is this critical system infrastructure?            -> ALLOW (telecom, IME, SystemUI...)
+ *  5. Is this a launcher / home screen?                  -> ALLOW
+ *  6. Is this package on the user's block list?          -> BLOCK
+ *  7. Everything else                                    -> ALLOW
  */
 class FocusPolicyEngine(private val context: Context) {
 
@@ -51,7 +43,12 @@ class FocusPolicyEngine(private val context: Context) {
 
         Log.d(TAG, "Evaluating: pkg=$packageName, class=$className, isActive=${FocusModeManager.isActive}")
 
-        // 1. Focus Mode must be active
+        // 1. A session must be running; quick sessions end themselves at their end time
+        if (FocusModeManager.hasQuickSessionExpired()) {
+            Log.d(TAG, "Quick session expired")
+            FocusSessionController.onQuickSessionExpired(context)
+            return evaluate(packageName, className)
+        }
         if (!FocusModeManager.isActive) {
             Log.d(TAG, "ALLOW: Focus Mode is inactive")
             return Decision.ALLOW
@@ -76,61 +73,25 @@ class FocusPolicyEngine(private val context: Context) {
             return Decision.ALLOW
         }
 
-        // 5. Launchers / Home screens are ALWAYS blocked during focus
+        // 5. In Personal Mode: Launchers / Home screens are ALLOWED
         if (isLauncherPackage(packageName)) {
-            Log.d(TAG, "BLOCK: Launcher/Home app ($packageName)")
-            return Decision.BLOCK
-        }
-
-        // 6. Voice assistants are ALWAYS blocked during focus
-        if (isAssistantPackage(packageName)) {
-            Log.d(TAG, "BLOCK: Voice assistant ($packageName)")
-            return Decision.BLOCK
-        }
-
-        // 7. Settings app is ALWAYS blocked to prevent uninstall/accessibility bypasses
-        if (isSettingsPackage(packageName)) {
-            Log.d(TAG, "BLOCK: Settings app ($packageName)")
-            return Decision.BLOCK
-        }
-
-        // 7b. Package installer is ALWAYS blocked during focus to prevent uninstallation
-        if (isPackageInstaller(packageName)) {
-            Log.d(TAG, "BLOCK: Package installer ($packageName)")
-            return Decision.BLOCK
-        }
-
-        // 8. Explicitly block Recent Apps / Task Switcher UI
-        if (isRecentAppsUI(className)) {
-            Log.d(TAG, "BLOCK: Recent Apps UI ($className)")
-            return Decision.BLOCK
-        }
-
-        // 9. Always-allowed list (e.g. user-configured Phone, Messages)
-        if (FocusModeManager.alwaysAllowedApps.contains(packageName)) {
-            Log.d(TAG, "ALLOW: Always-allowed app")
+            Log.d(TAG, "ALLOW: Launcher/Home app ($packageName)")
             return Decision.ALLOW
         }
 
-        // 10. User-selected allowed apps for this session
-        if (FocusModeManager.allowedApps.contains(packageName)) {
-            Log.d(TAG, "ALLOW: User-selected allowed app ($packageName)")
-            return Decision.ALLOW
+        // 6. Explicitly blocked packages in Personal Mode
+        if (FocusModeManager.blockedPackages.contains(packageName)) {
+            Log.d(TAG, "BLOCK: Explicitly blocked package ($packageName)")
+            DiagnosticsLogger.appBlocked(packageName)
+            return Decision.BLOCK
         }
 
-        // 11. Non-launchable system packages (SystemUI, Play Services, background processes) are allowed
-        if (isNonLaunchableSystemPackage(packageName)) {
-            Log.d(TAG, "ALLOW: Non-launchable system package ($packageName)")
-            return Decision.ALLOW
-        }
-
-        // 12. Everything else is blocked
-        Log.d(TAG, "BLOCK: Non-allowed package ($packageName)")
-        DiagnosticsLogger.appBlocked(packageName)
-        return Decision.BLOCK
+        // 7. Everything else remains ALLOWED in Personal Mode
+        Log.d(TAG, "ALLOW: Package not blocked ($packageName)")
+        return Decision.ALLOW
     }
 
-    // ── Private Helpers ──────────────────────────────────────────────────────
+    // ── Private / Internal Helpers ───────────────────────────────────────────
 
     /**
      * Critical system infrastructure that must ALWAYS be allowed during Focus Mode.
@@ -151,7 +112,10 @@ class FocusPolicyEngine(private val context: Context) {
      * - Emergency services
      * - Audio system
      */
-    private fun isCriticalSystemInfrastructure(packageName: String): Boolean {
+    fun isCriticalSystemInfrastructure(packageName: String): Boolean {
+        // Dynamic check: default dialer package & ACTION_DIAL / ACTION_CALL intent handlers
+        if (getDynamicCommunicationPackages().contains(packageName)) return true
+
         // Check against our comprehensive whitelist
         if (CRITICAL_SYSTEM_PACKAGES.contains(packageName)) return true
 
@@ -164,77 +128,40 @@ class FocusPolicyEngine(private val context: Context) {
         return false
     }
 
-    private fun isLauncherPackage(packageName: String): Boolean {
+    fun getDynamicCommunicationPackages(): Set<String> {
+        val result = mutableSetOf<String>()
+        try {
+            val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? android.telecom.TelecomManager
+            telecomManager?.defaultDialerPackage?.let { if (it.isNotBlank()) result.add(it) }
+
+            val dialIntent = Intent(Intent.ACTION_DIAL)
+            val dialResolves = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.queryIntentActivities(dialIntent, PackageManager.ResolveInfoFlags.of(0L))
+            } else {
+                @Suppress("DEPRECATION")
+                pm.queryIntentActivities(dialIntent, 0)
+            }
+            for (info in dialResolves) {
+                info.activityInfo?.packageName?.let { if (it.isNotBlank()) result.add(it) }
+            }
+
+            val smsPackage = android.provider.Telephony.Sms.getDefaultSmsPackage(context)
+            if (!smsPackage.isNullOrBlank()) {
+                result.add(smsPackage)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Error resolving dynamic communication packages", e)
+        }
+        return result
+    }
+
+    fun isLauncherPackage(packageName: String): Boolean {
         if (launcherPackages.contains(packageName)) return true
         val lower = packageName.lowercase(Locale.ROOT)
         return KNOWN_LAUNCHERS.contains(lower) ||
             lower.endsWith(".launcher") ||
             lower.contains("launcher") ||
             lower.endsWith(".home")
-    }
-
-    private fun isAssistantPackage(packageName: String): Boolean {
-        // Hard-code Google assistant (most common)
-        if (packageName == "com.google.android.googlequicksearchbox") return true
-        if (packageName == "com.samsung.android.bixby.service") return true
-        if (packageName == "com.samsung.android.bixbyvision.framework") return true
-        if (packageName == "com.microsoft.cortana") return true
-        // Read the system assistant setting
-        return try {
-            val assistantSetting = android.provider.Settings.Secure.getString(
-                context.contentResolver,
-                "assistant"
-            )
-            if (!assistantSetting.isNullOrBlank()) {
-                val pkg = assistantSetting.split("/").firstOrNull()
-                pkg == packageName
-            } else false
-        } catch (_: Exception) {
-            false
-        }
-    }
-
-    private fun isRecentAppsUI(className: String?): Boolean {
-        if (className.isNullOrBlank()) return false
-        val lower = className.lowercase(Locale.ROOT)
-        return lower.contains("recents") ||
-               lower.contains("recentapps") ||
-               lower.contains("taskswitcher") ||
-               lower.contains("overview")
-    }
-
-    private fun isSettingsPackage(packageName: String): Boolean {
-        val lower = packageName.lowercase(Locale.ROOT)
-        return lower.contains("settings") ||
-               lower == "com.samsung.android.lool" // Samsung Device Care
-    }
-
-    private fun isPackageInstaller(packageName: String): Boolean {
-        val lower = packageName.lowercase(Locale.ROOT)
-        return lower.contains("packageinstaller") ||
-               lower == "com.android.packageinstaller" ||
-               lower == "com.google.android.packageinstaller"
-    }
-
-    /**
-     * Checks if the package is a background/telephony system service rather than a user-facing
-     * launchable application (like Chrome or YouTube) which should be subject to allowed-apps whitelist.
-     */
-    private fun isNonLaunchableSystemPackage(packageName: String): Boolean {
-        // Explicitly allow Google Play Services, Android Framework, and SystemUI
-        if (packageName == "com.google.android.gms" ||
-            packageName == "android" ||
-            packageName.startsWith("com.android.systemui") ||
-            packageName.startsWith("com.samsung.android.systemui")
-        ) {
-            return true
-        }
-
-        val appClassifier = AppClassifier(context)
-        val isSystem = appClassifier.isSystemPackage(packageName)
-        val isLaunchable = appClassifier.isLaunchable(packageName)
-
-        return isSystem && !isLaunchable
     }
 
     private fun resolveLauncherPackages(): Set<String> {
@@ -251,7 +178,7 @@ class FocusPolicyEngine(private val context: Context) {
     companion object {
         private const val TAG = "FocusPolicyEngine"
 
-        private val KNOWN_LAUNCHERS = setOf(
+        val KNOWN_LAUNCHERS = setOf(
             "com.sec.android.app.launcher",
             "com.samsung.android.app.homup",
             "com.google.android.apps.nexuslauncher",
@@ -274,7 +201,7 @@ class FocusPolicyEngine(private val context: Context) {
          * Comprehensive whitelist of system packages that must NEVER be blocked.
          * These are the packages that enable core device functionality.
          */
-        private val CRITICAL_SYSTEM_PACKAGES = setOf(
+        val CRITICAL_SYSTEM_PACKAGES = setOf(
             // ── Android Framework ───────────────────────────────────────────
             "android",
             "com.android.systemui",
@@ -337,6 +264,11 @@ class FocusPolicyEngine(private val context: Context) {
             "com.sec.android.app.myfiles",
             "com.google.android.apps.nbu.files",
             "com.samsung.android.app.myfiles",
+
+            // ── Package Installer (allow APK installation dialogs) ──────────
+            "com.android.packageinstaller",
+            "com.google.android.packageinstaller",
+            "com.samsung.android.packageinstaller",
 
             // ── Google Play Services / Framework ────────────────────────────
             "com.google.android.gms",
@@ -401,6 +333,9 @@ class FocusPolicyEngine(private val context: Context) {
             "com.android.permissioncontroller", // Permission UI
             "com.android.se.",            // Secure element
             "com.android.certinstaller",  // Certificate installer
+            "com.android.packageinstaller", // Package installer
+            "com.google.android.packageinstaller",
+            "com.samsung.android.packageinstaller",
         )
     }
 }

@@ -8,7 +8,6 @@ import '../interfaces/password_service.dart';
 import '../interfaces/storage_service.dart';
 
 /// Concrete implementation of [PasswordService].
-///
 /// Uses PBKDF2-like salted iterations of HMAC-SHA256 and Hive for persistence.
 class PasswordServiceImpl implements PasswordService {
   final StorageService _storageService;
@@ -20,7 +19,6 @@ class PasswordServiceImpl implements PasswordService {
 
   @override
   String hashPassword(String plainPassword) {
-    // Generate a secure random salt
     final random = Random.secure();
     final saltBytes = List<int>.generate(16, (_) => random.nextInt(256));
     final saltHex = base64.encode(saltBytes);
@@ -70,13 +68,63 @@ class PasswordServiceImpl implements PasswordService {
   }
 
   @override
+  Future<void> saveAdminConfig({
+    required String password,
+    String? adminName,
+    String? adminContact,
+    String? recoveryChallenge,
+    String? recoveryAnswer,
+  }) async {
+    final hashed = hashPassword(password);
+    String? hashedAnswer;
+    if (recoveryAnswer != null && recoveryAnswer.trim().isNotEmpty) {
+      final normalized = recoveryAnswer.trim().toLowerCase();
+      hashedAnswer = sha256.convert(utf8.encode(normalized)).toString();
+    }
+
+    final settings = AdminSettings(
+      passwordHash: hashed,
+      adminName: adminName,
+      adminContact: adminContact,
+      recoveryChallenge: recoveryChallenge,
+      recoveryAnswerHash: hashedAnswer,
+      failedAttemptCount: 0,
+      lastFailedAttempt: null,
+    );
+
+    await _storageService.put(
+      AppConstants.adminSettingsBox,
+      AppConstants.adminPasswordKey,
+      settings,
+    );
+  }
+
+  @override
+  Future<void> updateAdminProfile({
+    String? adminName,
+    String? adminContact,
+  }) async {
+    final current = await getAdminSettings();
+    if (current == null) return;
+    final updated = current.copyWith(
+      adminName: adminName ?? current.adminName,
+      adminContact: adminContact ?? current.adminContact,
+    );
+    await _storageService.put(
+      AppConstants.adminSettingsBox,
+      AppConstants.adminPasswordKey,
+      updated,
+    );
+  }
+
+  @override
   Future<AdminSettings?> getAdminSettings() async {
     try {
       return _storageService.get<AdminSettings>(
         AppConstants.adminSettingsBox,
         AppConstants.adminPasswordKey,
       );
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
@@ -144,9 +192,9 @@ class PasswordServiceImpl implements PasswordService {
     }
     return Duration.zero;
   }
+
   @override
   Future<void> resetPassword() async {
-    // Delete the admin settings entry to clear the stored password.
     await _storageService.delete(AppConstants.adminSettingsBox, AppConstants.adminPasswordKey);
   }
 }

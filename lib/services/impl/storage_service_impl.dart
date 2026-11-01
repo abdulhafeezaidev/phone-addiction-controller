@@ -1,22 +1,15 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
 
 import '../interfaces/storage_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/app_logger.dart';
-import '../../domain/models/allowed_app.dart';
 import '../../domain/models/admin_settings.dart';
-import '../../domain/models/focus_session.dart';
-import '../../domain/models/focus_session_snapshot.dart';
 import '../../domain/models/emergency_override_state.dart';
 import '../../domain/models/routine.dart';
-import '../../domain/models/app_settings.dart';
 
 /// Concrete implementation of [StorageService] backed by Hive.
-///
-/// Features try-catch fallback handling for typed Hive boxes to prevent
-/// generic mismatch runtime errors from ever crashing Riverpod providers or UI.
 class StorageServiceImpl implements StorageService {
-  Box _getBox(String boxName) {
+  Box<dynamic> _getBox(String boxName) {
     if (!Hive.isBoxOpen(boxName)) {
       AppLogger.warning('Box "$boxName" is not open');
     }
@@ -24,18 +17,10 @@ class StorageServiceImpl implements StorageService {
       return Hive.box(boxName);
     } catch (_) {
       switch (boxName) {
-        case AppConstants.focusSessionBox:
-          return Hive.box<FocusSession>(boxName);
-        case AppConstants.allowedAppsBox:
-          return Hive.box<AllowedApp>(boxName);
         case AppConstants.routinesBox:
           return Hive.box<Routine>(boxName);
         case AppConstants.adminSettingsBox:
           return Hive.box<AdminSettings>(boxName);
-        case AppConstants.appSettingsBox:
-          return Hive.box<AppSettings>(boxName);
-        case AppConstants.focusSessionSnapshotBox:
-          return Hive.box<FocusSessionSnapshot>(boxName);
         case AppConstants.emergencyOverrideBox:
           return Hive.box<EmergencyOverrideState>(boxName);
         default:

@@ -121,8 +121,8 @@ class ScheduleManager(private val context: Context) {
     fun cancelRoutine(id: String) {
         // Cancel up to 10 slot alarms per routine (generous upper bound)
         for (slotIndex in 0 until 10) {
-            cancelAlarm(getStartRequestCode(id, slotIndex))
-            cancelAlarm(getStopRequestCode(id, slotIndex))
+            cancelAlarm(getStartRequestCode(id, slotIndex), isStart = true)
+            cancelAlarm(getStopRequestCode(id, slotIndex), isStart = false)
         }
         DiagnosticsLogger.routineCancelled(id)
         Log.d(TAG, "Cancelled routine: $id")
@@ -143,6 +143,7 @@ class ScheduleManager(private val context: Context) {
     fun isAnyRoutineActive(): Boolean {
         val now = Calendar.getInstance()
         val currentDay = convertCalendarDayToWeekday(now.get(Calendar.DAY_OF_WEEK))
+        val previousDay = (currentDay + 6) % 7
         val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
 
         val routines = getAllRoutines()
@@ -156,8 +157,6 @@ class ScheduleManager(private val context: Context) {
                 for (i in 0 until wdArray.length()) {
                     weekdays.add(wdArray.getInt(i))
                 }
-
-                if (!weekdays.contains(currentDay)) continue
 
                 // Check all slots
                 val slots = mutableListOf<Pair<Int, Int>>() // (startMinutes, endMinutes)
@@ -178,12 +177,20 @@ class ScheduleManager(private val context: Context) {
 
                 for ((startMinutes, endMinutes) in slots) {
                     val isOvernight = startMinutes >= endMinutes
-                    val active = if (isOvernight) {
-                        currentMinutes >= startMinutes || currentMinutes < endMinutes
+                    if (isOvernight) {
+                        // Same day portion (e.g. Mon 22:00-23:59)
+                        if (weekdays.contains(currentDay) && currentMinutes >= startMinutes) {
+                            return true
+                        }
+                        // Next day morning portion (e.g. Tue 00:00-06:00, started Mon)
+                        if (weekdays.contains(previousDay) && currentMinutes < endMinutes) {
+                            return true
+                        }
                     } else {
-                        currentMinutes >= startMinutes && currentMinutes < endMinutes
+                        if (weekdays.contains(currentDay) && currentMinutes >= startMinutes && currentMinutes < endMinutes) {
+                            return true
+                        }
                     }
-                    if (active) return true
                 }
 
             } catch (e: Exception) {
@@ -199,6 +206,7 @@ class ScheduleManager(private val context: Context) {
     fun getActiveRoutineJson(): String? {
         val now = Calendar.getInstance()
         val currentDay = convertCalendarDayToWeekday(now.get(Calendar.DAY_OF_WEEK))
+        val previousDay = (currentDay + 6) % 7
         val currentMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
 
         for ((_, json) in getAllRoutines()) {
@@ -209,8 +217,6 @@ class ScheduleManager(private val context: Context) {
                 val weekdays = mutableListOf<Int>()
                 val wdArray = obj.getJSONArray("weekdays")
                 for (i in 0 until wdArray.length()) weekdays.add(wdArray.getInt(i))
-
-                if (!weekdays.contains(currentDay)) continue
 
                 val slots = mutableListOf<Pair<Int, Int>>()
                 if (obj.has("slots")) {
@@ -228,8 +234,12 @@ class ScheduleManager(private val context: Context) {
 
                 for ((sm, em) in slots) {
                     val overnight = sm >= em
-                    val active = if (overnight) (currentMinutes >= sm || currentMinutes < em)
-                                 else (currentMinutes >= sm && currentMinutes < em)
+                    val active = if (overnight) {
+                        (weekdays.contains(currentDay) && currentMinutes >= sm) ||
+                        (weekdays.contains(previousDay) && currentMinutes < em)
+                    } else {
+                        weekdays.contains(currentDay) && currentMinutes >= sm && currentMinutes < em
+                    }
                     if (active) return json
                 }
             } catch (_: Exception) {}
@@ -238,24 +248,13 @@ class ScheduleManager(private val context: Context) {
     }
 
     /**
-     * Re-schedules all stored routines. Called after boot or when alarm fires
-     * (to schedule the next occurrence).
+     * Re-schedules all stored routines. Called after boot or time changes. Starting a session for a
+     * routine that is active right now is done by FocusSessionController.reconcileWithRoutines.
      */
     fun rescheduleAllFromStorage() {
         val routines = getAllRoutines()
         for ((_, json) in routines) {
             scheduleRoutine(json)
-        }
-
-        // If any routine is currently active AND focus mode isn't already on,
-        // start a focus session immediately.
-        if (isAnyRoutineActive() && !FocusModeManager.isActive) {
-            val activeJson = getActiveRoutineJson()
-            val routineId = activeJson?.let { JSONObject(it).optString("id") }
-            FocusModeManager.startSession(scheduled = true, routineId = routineId)
-            if (routineId != null) {
-                DiagnosticsLogger.routineRestoredAfterReboot(routineId)
-            }
         }
     }
 
@@ -330,13 +329,16 @@ class ScheduleManager(private val context: Context) {
         }
     }
 
-    private fun cancelAlarm(requestCode: Int) {
-        val intent = Intent(context, ScheduleAlarmReceiver::class.java)
+    private fun cancelAlarm(requestCode: Int, isStart: Boolean) {
+        val intent = Intent(context, ScheduleAlarmReceiver::class.java).apply {
+            action = if (isStart) ACTION_START else ACTION_STOP
+        }
         val pendingIntent = PendingIntent.getBroadcast(
             context, requestCode, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         alarmManager.cancel(pendingIntent)
+        pendingIntent.cancel()
     }
 
     private fun getNextAlarmTime(weekdays: List<Int>, hour: Int, minute: Int): Long? {

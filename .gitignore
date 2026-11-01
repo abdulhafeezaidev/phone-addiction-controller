@@ -60,3 +60,9 @@ app.*.map.json
 
 # AI Agents
 .agents/
+
+# Release signing secrets
+android/key.properties
+*.jks
+*.keystore
+

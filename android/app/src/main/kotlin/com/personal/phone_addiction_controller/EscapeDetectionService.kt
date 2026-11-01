@@ -1,7 +1,6 @@
 package com.personal.phone_addiction_controller
 
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
@@ -25,7 +24,7 @@ data class ForegroundApp(
  *   FocusPolicyEngine.evaluate()
  *         ↓
  *   ALLOW → notify listener
- *   BLOCK → launch Focus Home (with staggered retry)
+ *   BLOCK → show the block overlay
  *
  * This class contains ZERO policy logic of its own.
  * All decisions are delegated to [FocusPolicyEngine].
@@ -35,6 +34,7 @@ class EscapeDetectionService(private val context: Context) {
     interface AppChangeListener {
         fun onForegroundAppChanged(app: ForegroundApp)
         fun onAppBlocked(packageName: String, appName: String)
+        fun onAppAllowed(packageName: String)
         fun forceHome()
     }
 
@@ -53,10 +53,22 @@ class EscapeDetectionService(private val context: Context) {
     // Minimum ms between successive redirects for the same blocked package
     private val recoveryCooldownMs = 800L
     // Delay intervals for the staggered retry launches (ms)
-    private val retryDelaysMs = longArrayOf(0L, 400L, 900L)
+    private val pendingRetryRunnables = mutableListOf<Runnable>()
+
+    fun cancelPendingRetries() {
+        synchronized(pendingRetryRunnables) {
+            for (runnable in pendingRetryRunnables) {
+                mainHandler.removeCallbacks(runnable)
+            }
+            pendingRetryRunnables.clear()
+        }
+    }
 
     fun setListener(listener: AppChangeListener?) {
         this.listener = listener
+        if (listener == null) {
+            cancelPendingRetries()
+        }
     }
 
     /**
@@ -81,54 +93,33 @@ class EscapeDetectionService(private val context: Context) {
         // Delegate the actual policy decision to FocusPolicyEngine.
         // This is the ONLY place that decides ALLOW or BLOCK.
         val decision = policyEngine.evaluate(packageName, className)
+        Log.d(TAG, "handleForegroundPackage: pkg=$packageName decision=$decision")
 
         if (decision == FocusPolicyEngine.Decision.BLOCK) {
             enforceBlock(packageName, appName, now)
+        } else {
+            // Package is ALLOWED
+            // Do not dismiss overlay if the foreground event is from our own app (the overlay itself)
+            if (packageName != context.packageName) {
+                lastRecoveryPackage = ""
+                cancelPendingRetries()
+                listener?.onAppAllowed(packageName)
+            }
         }
     }
 
     // ── Private: Enforcement ─────────────────────────────────────────────────
 
     private fun enforceBlock(packageName: String, appName: String, now: Long) {
-        // Cooldown: prevent rapid re-launching Focus Home for the same blocked app
+        // Cooldown: prevent rapid re-launching overlay for the same blocked app
         if (packageName == lastRecoveryPackage && now - lastRecoveryTime < recoveryCooldownMs) {
             return
         }
         lastRecoveryPackage = packageName
         lastRecoveryTime = now
 
-        Log.d(TAG, "BLOCKING: $appName ($packageName) → redirecting to Focus Home")
+        Log.d(TAG, "BLOCKING: $appName ($packageName) → presenting Block Overlay")
         listener?.onAppBlocked(packageName, appName)
-        
-        // Immediately collapse the Recent Apps UI / System UI to prevent 
-        // the user from interacting with it during the 5-second restriction window.
-        listener?.forceHome()
-
-        // Staggered retries to defeat Android's 5-second background launch restriction
-        // that activates after a Home button press.
-        for (delayMs in retryDelaysMs) {
-            mainHandler.postDelayed({
-                launchFocusHome(packageName, appName)
-            }, delayMs)
-        }
-    }
-
-    private fun launchFocusHome(packageName: String, appName: String) {
-        try {
-            val intent = Intent(context, MainActivity::class.java).apply {
-                addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP
-                )
-                putExtra("focus_recovery", true)
-                putExtra("blocked_package", packageName)
-                putExtra("blocked_app_name", appName)
-            }
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to launch Focus Home", e)
-        }
     }
 
     // ── Private: Helpers ─────────────────────────────────────────────────────

@@ -1,8 +1,47 @@
+import java.util.Properties
+
 plugins {
     id "com.android.application"
     id "org.jetbrains.kotlin.android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
+}
+
+// Release signing: create android/key.properties (see android/key.properties.example).
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+def requiredSigningProperties = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword']
+def missingSigningProperties = requiredSigningProperties.findAll {
+    !keystoreProperties.getProperty(it)?.trim()
+}
+def releaseKeystorePath = keystoreProperties.getProperty('storeFile')?.trim()
+def releaseKeystoreFile = releaseKeystorePath ? file(releaseKeystorePath) : null
+def releaseSigningConfigured = keystorePropertiesFile.exists() &&
+        missingSigningProperties.isEmpty() &&
+        releaseKeystoreFile?.isFile()
+
+tasks.register('validateReleaseSigning') {
+    doLast {
+        if (!keystorePropertiesFile.isFile()) {
+            throw new GradleException(
+                    'Release builds require android/key.properties. Copy android/key.properties.example and configure a production keystore.')
+        }
+        if (!missingSigningProperties.isEmpty()) {
+            throw new GradleException(
+                    "Release signing properties are missing: ${missingSigningProperties.join(', ')}.")
+        }
+        if (!releaseKeystoreFile?.isFile()) {
+            throw new GradleException(
+                    "Release keystore does not exist: ${releaseKeystorePath}.")
+        }
+    }
+}
+
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    dependsOn tasks.named('validateReleaseSigning')
 }
 
 android {
@@ -23,31 +62,44 @@ android {
 
     defaultConfig {
         applicationId = "com.personal.phone_addiction_controller"
-        // Focus Guard requires Android 6.0+ for AccessibilityService APIs
-        minSdkVersion = flutter.minSdkVersion
+        // startForegroundService() and notification channels require Android 8.0 (API 26)
+        minSdkVersion = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Required for permission_handler
         multiDexEnabled = true
+    }
+
+    signingConfigs {
+        release {
+            if (releaseSigningConfigured) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile releaseKeystoreFile
+                storePassword keystoreProperties['storePassword']
+            }
+        }
     }
 
     buildTypes {
         release {
-            // For personal use — signing config can be set later
-            signingConfig = signingConfigs.debug
-            // Disable minification for easier debugging
-            minifyEnabled = false
-            shrinkResources = false
+            signingConfig = signingConfigs.release
+            minifyEnabled = true
+            shrinkResources = true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
     }
-}
 
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+}
 flutter {
     source = "../.."
 }

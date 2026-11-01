@@ -1,21 +1,22 @@
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/models/routine.dart';
 import '../../domain/models/time_slot.dart';
 import '../interfaces/schedule_service.dart';
 import '../interfaces/storage_service.dart';
+import '../native_bridge_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/app_logger.dart';
 
 class ScheduleServiceImpl implements ScheduleService {
-  ScheduleServiceImpl({required this.storageService});
+  ScheduleServiceImpl({
+    required this.storageService,
+    required this.nativeBridgeService,
+  });
 
   final StorageService storageService;
-  
-  static const _channel =
-      MethodChannel('com.personal.phone_addiction_controller/accessibility');
+  final NativeBridgeService nativeBridgeService;
   final _uuid = const Uuid();
 
   @override
@@ -53,7 +54,7 @@ class ScheduleServiceImpl implements ScheduleService {
       routine.id,
       routine,
     );
-    
+
     await _syncWithNative(routine);
     return routine;
   }
@@ -65,7 +66,7 @@ class ScheduleServiceImpl implements ScheduleService {
       routine.id,
       routine,
     );
-    
+
     await _syncWithNative(routine);
     return routine;
   }
@@ -88,8 +89,7 @@ class ScheduleServiceImpl implements ScheduleService {
   @override
   Future<bool> hasOverlappingRoutines(Routine routine) async {
     final routines = await getRoutines();
-    
-    // Convert to minute of day for easy comparison
+
     final startMinutes = routine.startTime.hour * 60 + routine.startTime.minute;
     final endMinutes = routine.endTime.hour * 60 + routine.endTime.minute;
     final isOvernight = startMinutes >= endMinutes;
@@ -97,7 +97,6 @@ class ScheduleServiceImpl implements ScheduleService {
     for (final existing in routines) {
       if (existing.id == routine.id || !existing.enabled) continue;
 
-      // Check for shared days
       final hasSharedDays = routine.weekdays.any((d) => existing.weekdays.contains(d));
       if (!hasSharedDays) continue;
 
@@ -105,12 +104,10 @@ class ScheduleServiceImpl implements ScheduleService {
       final eEndMinutes = existing.endTime.hour * 60 + existing.endTime.minute;
       final eIsOvernight = eStartMinutes >= eEndMinutes;
 
-      // Simplistic overlap check for now
       if (!isOvernight && !eIsOvernight) {
         if (startMinutes < eEndMinutes && endMinutes > eStartMinutes) return true;
       } else {
-        // Just return true if there's any complexity for now to be safe
-        return true; 
+        return true;
       }
     }
     return false;
@@ -128,40 +125,48 @@ class ScheduleServiceImpl implements ScheduleService {
   @override
   Future<void> cancelRoutine(String routineId) async {
     try {
-      await _channel.invokeMethod('cancelRoutine', {'routineId': routineId});
-    } on PlatformException catch (e) {
+      await nativeBridgeService.cancelRoutine(routineId);
+    } catch (e) {
       AppLogger.error('Failed to cancel routine in native layer', error: e);
     }
   }
 
   @override
   Future<void> cancelAllRoutines() async {
-    try {
-      await _channel.invokeMethod('cancelAllRoutines');
-    } on PlatformException catch (e) {
-      AppLogger.error('Failed to cancel all routines in native layer', error: e);
+    final routines = await getRoutines();
+    for (final r in routines) {
+      await cancelRoutine(r.id);
     }
   }
 
   @override
   Future<bool> isAnyRoutineActive() async {
-    try {
-      final res = await _channel.invokeMethod<bool>('isAnyRoutineActive');
-      return res ?? false;
-    } on PlatformException catch (e) {
-      AppLogger.error('Failed to check if any routine is active', error: e);
-      return false;
-    }
+    return await nativeBridgeService.isAnyRoutineActive();
   }
 
   @override
   Future<Routine?> getNextRoutine() async {
-    // Return null or basic implementation
-    return null; 
+    final routines = await getRoutines();
+    final enabled = routines.where((r) => r.enabled).toList();
+    if (enabled.isEmpty) return null;
+    return enabled.first;
   }
 
   Future<void> _syncWithNative(Routine routine) async {
     try {
+      final savedList = storageService.get<List<dynamic>>(
+        AppConstants.settingsBox,
+        AppConstants.lastBlockedPackagesKey,
+      );
+      final savedPkgs = savedList
+              ?.map((e) => e.toString())
+              .where((s) => s.isNotEmpty)
+              .toList() ??
+          const <String>[];
+      final blockedPkgs = savedPkgs.isNotEmpty
+          ? savedPkgs
+          : await nativeBridgeService.getBlockedPackages();
+
       final jsonStr = jsonEncode({
         'id': routine.id,
         'label': routine.label,
@@ -172,10 +177,11 @@ class ScheduleServiceImpl implements ScheduleService {
         'endMinute': routine.endTime.minute,
         'enabled': routine.enabled,
         'slots': routine.slots.map((s) => s.toJson()).toList(),
+        'blockedPackages': blockedPkgs,
       });
 
-      await _channel.invokeMethod('scheduleRoutine', {'routineJson': jsonStr});
-    } on PlatformException catch (e) {
+      await nativeBridgeService.scheduleRoutine(jsonStr);
+    } catch (e) {
       AppLogger.error('Failed to sync routine with native layer', error: e);
     }
   }

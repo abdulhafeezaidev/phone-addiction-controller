@@ -29,4 +29,11 @@ abstract class EmergencyOverrideService {
   Duration get reflectionDuration;
   Duration get overrideDuration;
   Duration get cooldownDuration;
+
+  /// Updates the emergency override protocol durations.
+  Future<void> updateProtocolSettings({
+    int? reflectionMinutes,
+    int? overrideHours,
+    int? cooldownHours,
+  });
 }

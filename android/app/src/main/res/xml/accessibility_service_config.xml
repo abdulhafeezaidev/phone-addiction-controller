@@ -1,20 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Accessibility Service Configuration for FocusAccessibilityService.
-
-    TODO: Uncomment the <service> entry in AndroidManifest.xml and implement
-          the FocusAccessibilityService Kotlin class before enabling this config.
-
-    Required flags:
-    - flagReportViewIds: Identify the package name of the foreground app
-    - flagRetrieveInteractiveWindows: Inspect window events
-
-    Event types to watch:
-    - typeWindowStateChanged: Fires when a new activity/window is opened
-    - typeWindowContentChanged: Fires when window content changes
-
-    package: "" means we watch all packages (needed for blocking any app)
--->
 <accessibility-service
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/accessibility_service_description"
@@ -23,5 +7,4 @@
     android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows"
     android:canRetrieveWindowContent="true"
     android:canPerformGestures="false"
-    android:notificationTimeout="10"
-    android:packageNames="" />
+    android:notificationTimeout="50" />

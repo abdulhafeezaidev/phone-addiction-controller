@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Focus Guard</string>
-    <string name="accessibility_service_description">Focus Guard uses this service to detect which app is in the foreground and block distracting apps during Focus Mode sessions. This service runs only when Focus Mode is active.</string>
-    <string name="focus_notification_channel_name">Focus Mode</string>
-    <string name="focus_notification_channel_description">Persistent notification shown while Focus Mode is active</string>
-    <string name="schedule_notification_channel_name">Schedule Alerts</string>
-    <string name="schedule_notification_channel_description">Notifications for scheduled Focus Mode sessions</string>
-    <string name="device_admin_label">FocusOS Guard</string>
-    <string name="device_admin_description">Enables bypass-proof Focus Session enforcement via Lock Task Mode.</string>
+    <string name="app_name">Detox</string>
+    <string name="accessibility_service_label">Detox - App Blocker</string>
+    <string name="accessibility_service_description">Detox uses this service to detect foreground apps for your focus rules. If you separately enable its optional screen guard, it also checks visible Settings text for Detox removal actions. Accessibility data stays on your device.</string>
+    <string name="focus_notification_channel_name">Focus session</string>
+    <string name="focus_notification_channel_description">Shown while a Focus session is running</string>
+    <string name="schedule_notification_channel_name">Routine alerts</string>
+    <string name="schedule_notification_channel_description">Notifications for scheduled Focus routines</string>
+    <string name="device_admin_label">Detox</string>
+    <string name="device_admin_description">Android requires this Device Admin to be deactivated before Detox can be uninstalled. This is a deterrent, not an uninstall lock, and it does not give Detox control over your device.</string>
 </resources>
